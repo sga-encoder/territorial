@@ -1,0 +1,43 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header title="Anotaciones" [subtitle]="subtitle()" [actions]="headerActions" />
+
+  @if (annotationService.error(); as errorMessage) {
+    <ui-card>
+      <ui-container justify="between" center="vertical" [gap]="3" wrap>
+        <ui-text color="danger">{{ errorMessage }}</ui-text>
+        <ui-button variant="secondary" size="sm" (clicked)="annotationService.loadAll()">
+          Reintentar
+        </ui-button>
+      </ui-container>
+    </ui-card>
+  }
+
+  @if (!annotationService.isLoading() && !annotationService.hasAnnotations()) {
+    <ui-card>
+      <ui-empty-state
+        icon="map-pin"
+        title="Aún no hay anotaciones registradas"
+        message="Crea la primera anotación para caracterizar el territorio."
+      >
+        <ui-button variant="secondary" size="sm" (clicked)="openCreate()">
+          <ui-icon name="plus" size="sm" />
+          Crear anotación
+        </ui-button>
+      </ui-empty-state>
+    </ui-card>
+  } @else {
+    <ui-card>
+      <ui-filter [config]="filterConfig()" [data]="rows()" (filteredChange)="onFiltered($event)" />
+    </ui-card>
+
+    <ui-dynamic-table
+      [columns]="columns"
+      [rows]="filteredRows()"
+      [actions]="actions"
+      [loading]="annotationService.isLoading()"
+      emptyMessage="Ninguna anotación coincide con los filtros"
+      rowKey="id"
+      [pageSize]="8"
+    />
+  }
+</ui-container>

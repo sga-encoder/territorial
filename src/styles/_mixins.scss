@@ -1,0 +1,147 @@
+// SCSS stays reserved for visual recipes and complex animation work
+// (CLAUDE.md); layout and spacing belong to Tailwind utilities inside
+// components/ui components. Every mixin consumes design tokens only — never
+// hardcoded values (UI Kit atomic principle).
+
+/// Entrance animation for panels/overlays. The `fade-slide-in` keyframes are
+/// declared globally in styles.scss; this mixin applies them while honouring
+/// the user's reduced-motion preference (WCAG 2.3.3).
+@mixin fade-slide-in($duration: 180ms) {
+  animation: fade-slide-in $duration ease-out both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/// Top "light line" — the visual thread that unifies glass and solid surfaces
+/// across the UI Kit. Implemented as an inset shadow so it follows
+/// border-radius and composes with an optional elevation shadow.
+/// Template equivalent: `inset-shadow-highlight` / `inset-shadow-glass-highlight`.
+@mixin surface-highlight($color: var(--color-surface-highlight), $shadow: null) {
+  @if $shadow {
+    box-shadow:
+      inset 0 1px 0 0 $color,
+      $shadow;
+  } @else {
+    box-shadow: inset 0 1px 0 0 $color;
+  }
+}
+
+/// Solid surface — opaque, maximum legibility, subtle highlight. For tables,
+/// default Card and any dense content ("solid where it reads"). Flat variant.
+@mixin solid-surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  @include surface-highlight(var(--color-surface-highlight), var(--elevation-sm));
+}
+
+/// Solid 3D mate — el volumen viene del DIFERENCIAL DE BORDES (luz arriba/izq,
+/// sombra abajo/der) + un gradiente sutil + sombra trasera difusa, NUNCA de
+/// sombras internas encima del objeto. Para contenido activo/seleccionado:
+/// cuerpo del Modal, tab activo, ítem de sidebar activo, input lleno. Los
+/// valores fijos (175deg, grosores, %) son estructurales; los colores son tokens.
+@mixin solid-surface-3d {
+  background: linear-gradient(
+    175deg,
+    var(--color-3d-hi) 0%,
+    var(--color-glass-surface) 42%,
+    var(--color-3d-dk) 100%
+  );
+  border-top: 1.5px solid var(--color-border-h);
+  border-left: 1px solid var(--color-border-h);
+  border-right: 1px solid var(--color-3d-dk);
+  border-bottom: 1.5px solid var(--color-3d-dk);
+  box-shadow: var(--elevation-md);
+  position: relative;
+  overflow: hidden;
+
+  // Línea de luz superior (highlight) que cae hacia el centro.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 38%;
+    background: linear-gradient(180deg, var(--color-3d-hi), transparent);
+    pointer-events: none;
+  }
+}
+
+/// Input vacío — cavidad glass hundida en el material (blur propio + sombra
+/// interna SOLO aquí, por ser una cavidad, no un objeto elevado). Al llenarse se
+/// usa `input-filled`. Las sombras negras internas son estructurales (cavidad).
+@mixin input-glass {
+  background: var(--color-input-bg);
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+  border-top: 1px solid var(--color-input-bdr-t);
+  border-left: 1px solid var(--color-input-bdr-t);
+  border-right: 1px solid var(--color-input-bdr-t);
+  border-bottom: 1.5px solid var(--color-input-bdr-b);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 3px rgba(0, 0, 0, 0.28),
+    0 1px 0 var(--color-glass-highlight);
+
+  &::placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  &:hover {
+    background: var(--color-input-bg-h);
+    border-bottom-color: var(--color-input-bdr-bf);
+  }
+
+  &:focus {
+    background: var(--color-input-bg-f);
+    border-color: var(--color-input-bdr-bf);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.38),
+      0 0 0 3px var(--color-focus-ring);
+    outline: none;
+  }
+}
+
+/// Input con datos — solid 3D elevado sobre la cavidad (diferencial de bordes).
+@mixin input-filled {
+  background: linear-gradient(
+    175deg,
+    var(--color-3d-hi) 0%,
+    var(--color-glass-surface) 45%,
+    var(--color-3d-dk) 100%
+  );
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  backdrop-filter: blur(var(--blur-glass));
+  border-top: 1.5px solid var(--color-border-h);
+  border-left: 1px solid var(--color-border-h);
+  border-right: 1px solid var(--color-3d-dk);
+  border-bottom: 1.5px solid var(--color-3d-dk);
+  box-shadow: var(--elevation-sm);
+  font-weight: 500;
+
+  &:focus {
+    border-color: var(--color-input-bdr-bf);
+    box-shadow:
+      0 0 0 3px var(--color-focus-ring),
+      var(--elevation-sm);
+    outline: none;
+  }
+}
+
+/// Glass surface — translucency + blur + bright highlight. Only for floating
+/// chrome: Modal, Toast, Select dropdown, Tooltip, Sidebar, Navbar, Card
+/// `elevated` ("glass where it floats"). backdrop-filter is expensive: never
+/// apply it to list items or repeated content. Falls back to a solid surface
+/// when the browser lacks backdrop-filter support.
+@mixin glass-surface($blur: var(--blur-glass)) {
+  background-color: var(--color-glass-surface);
+  border: 1px solid var(--color-glass-border);
+  -webkit-backdrop-filter: blur($blur);
+  backdrop-filter: blur($blur);
+  @include surface-highlight(var(--color-glass-highlight), var(--elevation-lg));
+
+  @supports not (backdrop-filter: blur(1px)) {
+    background-color: var(--color-surface);
+  }
+}

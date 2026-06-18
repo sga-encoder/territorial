@@ -1,0 +1,43 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header title="Funcionarios" [subtitle]="subtitle()" [actions]="headerActions()" />
+
+  @if (officialService.error(); as errorMessage) {
+    <ui-card>
+      <ui-container justify="between" center="vertical" [gap]="3" wrap>
+        <ui-text color="danger">{{ errorMessage }}</ui-text>
+        <ui-button variant="secondary" size="sm" (clicked)="officialService.loadAll()">
+          Reintentar
+        </ui-button>
+      </ui-container>
+    </ui-card>
+  }
+
+  @if (!officialService.isLoading() && !officialService.hasOfficials()) {
+    <ui-card>
+      <ui-empty-state
+        icon="user"
+        title="Aún no hay funcionarios registrados"
+        message="Crea el primer funcionario para asociarlo a una entidad."
+      >
+        <ui-button variant="secondary" size="sm" (clicked)="openCreate()">
+          <ui-icon name="plus" size="sm" />
+          Crear funcionario
+        </ui-button>
+      </ui-empty-state>
+    </ui-card>
+  } @else {
+    <ui-card>
+      <ui-filter [config]="filterConfig()" [data]="rows()" (filteredChange)="onFiltered($event)" />
+    </ui-card>
+
+    <ui-dynamic-table
+      [columns]="columns"
+      [rows]="filteredRows()"
+      [actions]="actions"
+      [loading]="officialService.isLoading()"
+      emptyMessage="Ningún funcionario coincide con los filtros"
+      rowKey="id"
+      [pageSize]="8"
+    />
+  }
+</ui-container>

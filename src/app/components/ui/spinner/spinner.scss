@@ -1,0 +1,64 @@
+// Spinner líquido — patrón "l16" (la versión preferida): el GIRO de la línea en
+// forma de infinito. Dos capas idénticas, una espejada (scale -1) y desfasada
+// media vuelta: el recorte revela las gotas una a una (los "puntos"), llega a
+// pleno y las desvanece mientras la otra hace lo opuesto → la línea gira y cambia
+// de sentido de forma continua, sin cortarse. Sin máscara punteada (las gotas de
+// la onda son los puntos; el `blur` las conecta). `padding` interno → ninguna
+// línea toca el borde. Color desde currentColor (sin caja opaca → flota).
+//
+// Timing: 2.4s con ease-in-out (frena suave en los extremos) — el ritmo de
+// movimiento preferido. El desfase es media vuelta (1.2s) para que sea continuo.
+
+:host {
+  display: inline-grid;
+  overflow: visible; // el blur se sale de la caja de contenido
+}
+
+.goo {
+  display: inline-grid;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 5px; // margen interno: la línea nunca toca el borde
+  filter: blur(1px); // sutil para limar el dentado, pero bordes rígidos
+}
+
+.goo::before,
+.goo::after {
+  content: '';
+  grid-area: 1 / 1; // ambas capas en la misma celda (se superponen)
+  width: 100%;
+  height: 100%;
+  --drop: #0000 64%, currentColor 66% 98%, #0000 101%;
+  background:
+    radial-gradient(35% 146% at 50% 159%, var(--drop)) 0 0,
+    radial-gradient(35% 146% at 50% -59%, var(--drop)) 100% 100%;
+  background-size: calc(200% / 3) 50%;
+  background-repeat: repeat-x;
+  clip-path: inset(0 100% 0 0);
+  animation: goo 2.4s infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+// Capa espejada y media vuelta por detrás → el giro nunca queda vacío.
+.goo::after {
+  scale: -1 1;
+  animation-delay: -1.2s;
+}
+
+@keyframes goo {
+  50% {
+    clip-path: inset(0); // gotas reveladas (puntos que aparecen)
+  }
+
+  to {
+    clip-path: inset(0 0 0 100%); // se desvanecen continuando el giro
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goo::before,
+  .goo::after {
+    animation: none;
+    clip-path: inset(0);
+  }
+}

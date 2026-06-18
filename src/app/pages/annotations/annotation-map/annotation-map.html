@@ -1,0 +1,116 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header
+    title="Mapa de anotaciones"
+    subtitle="Visualización geográfica de anotaciones ciudadanas."
+  />
+
+  <ui-container center="vertical" [gap]="3" wrap>
+    <ui-select
+      [formControl]="departmentControl"
+      label="Departamento"
+      placeholder="Todos los departamentos"
+      [options]="departmentOptions()"
+      [searchable]="true"
+      [sort]="true"
+    />
+    <ui-select
+      [formControl]="cityControl"
+      label="Ciudad"
+      placeholder="Todas las ciudades"
+      [options]="cityOptions()"
+      [searchable]="true"
+      [sort]="true"
+    />
+    <ui-select
+      [formControl]="neighborhoodControl"
+      label="Barrio"
+      placeholder="Todos los barrios"
+      [options]="neighborhoodOptions()"
+    />
+    <ui-select
+      [formControl]="statusControl"
+      label="Estado"
+      placeholder="Todos los estados"
+      [options]="statusOptions"
+    />
+    <ui-select
+      [formControl]="entityControl"
+      label="Entidad"
+      placeholder="Todas las entidades"
+      [options]="entityOptions()"
+    />
+    <ui-badge variant="primary">{{ activeCount() }} activas</ui-badge>
+    @if (inactiveCount() > 0) {
+      <ui-badge variant="neutral">{{ inactiveCount() }} inactivas</ui-badge>
+    }
+    @if (isLoading()) {
+      <ui-spinner size="sm" color="muted" label="Cargando anotaciones" />
+    }
+  </ui-container>
+
+  <ui-card [padded]="false">
+    <div class="annotation-map-wrapper">
+      <div
+        #mapContainer
+        class="annotation-map-canvas"
+        [class.annotation-map-canvas--hidden]="hasNone()"
+        role="application"
+        aria-label="Mapa de anotaciones ciudadanas"
+      ></div>
+
+      @if (hasNone()) {
+        <div class="annotation-map-overlay" role="status" aria-live="polite">
+          <ui-empty-state
+            icon="map-pin"
+            title="Sin anotaciones"
+            [message]="emptyMessage()"
+          />
+        </div>
+      }
+
+      @if (selectedAnnotation(); as ann) {
+        <aside class="annotation-sidebar" aria-label="Detalle de anotación">
+          <div class="annotation-sidebar__header">
+            <ui-text weight="semibold" size="sm">Detalle</ui-text>
+            <button
+              type="button"
+              class="annotation-sidebar__close"
+              aria-label="Cerrar detalle"
+              (click)="closeSidebar()"
+            >
+              ✕
+            </button>
+          </div>
+
+          <ui-text size="sm">{{ ann.description }}</ui-text>
+
+          <div class="annotation-sidebar__meta">
+            <ui-text size="xs" color="muted">Barrio</ui-text>
+            <ui-text size="sm" weight="medium">{{ ann.neighborhood }}</ui-text>
+          </div>
+
+          <div class="annotation-sidebar__meta">
+            <ui-text size="xs" color="muted">Ciudadano</ui-text>
+            <ui-text size="sm" weight="medium">{{ ann.citizen }}</ui-text>
+          </div>
+
+          <div class="annotation-sidebar__meta">
+            <ui-text size="xs" color="muted">Estado</ui-text>
+            <ui-badge [variant]="ann.status === 'active' ? 'success' : 'neutral'">
+              {{ ann.status === 'active' ? 'Activa' : 'Inactiva' }}
+            </ui-badge>
+          </div>
+
+          @if (selectedAnnotationEntities().length > 0) {
+            <div class="annotation-sidebar__entities">
+              <ui-text size="xs" color="muted">Entidades vinculadas</ui-text>
+              @for (entityName of selectedAnnotationEntities(); track entityName) {
+                <ui-text size="sm">{{ entityName }}</ui-text>
+              }
+            </div>
+          }
+        </aside>
+      }
+    </div>
+  </ui-card>
+</ui-container>

@@ -1,0 +1,334 @@
+// Global entry point. Tailwind is loaded from tailwind.css (pure CSS so the
+// PostCSS plugin processes it without Sass interference); this file owns the
+// design tokens and the few global element styles.
+@use 'variables';
+
+@layer base {
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  // Visible focus indicator for keyboard navigation (WCAG 2.4.7 / 2.4.11).
+  // 3px so the translucent focus-ring token stays a clearly visible indicator.
+  :focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+// Keyframes consumed by the fade-slide-in mixin in _mixins.scss.
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+// Button ripple (Button.onPointerDown appends a sized <span> at the click point
+// and runs this; scale 0→1 because the span is pre-sized to cover the button).
+// Honour reduced-motion: the JS still appends the span but it resolves instantly.
+@keyframes ripple-expand {
+  from {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes ripple-expand {
+    from,
+    to {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+}
+
+// Modal entrance: nace en el centro y "rebota" — escala 0.85 → sobrepasa 1.03
+// (se expande) → se asienta en 1 (se reduce). Lo consume ModalOutlet vía
+// `.animate-modal-pop`; el velo entra con un fundido (`.animate-fade-in`).
+@keyframes modal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// Salida del modal: "rebote hacia el centro" — primero se expande un pelín
+// (1.04) y luego colapsa hacia el centro (0.82) desvaneciéndose. El mismo
+// transform-origin: center hace que el colapso sea hacia adentro.
+@keyframes modal-pop-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-modal-pop {
+  transform-origin: center;
+  animation: modal-pop 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-modal-pop-out {
+  transform-origin: center;
+  animation: modal-pop-out 220ms cubic-bezier(0.5, 0, 0.75, 0.3) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 200ms ease-out both;
+}
+
+.animate-fade-out {
+  animation: fade-out 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-pop,
+  .animate-modal-pop-out,
+  .animate-fade-in,
+  .animate-fade-out {
+    animation: none;
+  }
+}
+
+// ── Scrollbar ────────────────────────────────────────────────────────────────
+// Estilizado con tokens del sistema (nunca colores hardcodeados). Firefox usa
+// scrollbar-color; WebKit/Blink usan los pseudo-elementos. El thumb es un glass
+// sutil que se intensifica al hover; la pista es transparente.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-glass-border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-glass-border);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-h);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+// ── Badge / Chip click bounce ────────────────────────────────────────────────
+// Rebote desde el centro al hacer clic (escala que sobrepasa y vuelve).
+@keyframes pop-center {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.16);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pop-center {
+  transform-origin: center;
+  animation: pop-center 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-center {
+    animation: none;
+  }
+}
+
+// ── Field group (inputs/selects unidos sin separación) ────────────────────────
+// El consumidor envuelve los controles en <ui-field-group>; estos estilos
+// globales (no scoped) alcanzan el <input> / trigger interno de cada control
+// para colapsar bordes y esquinas adyacentes. El control enfocado sube de capa
+// para que su anillo no quede recortado por el vecino.
+.ui-field-group {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ui-field-group > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.ui-field-group > *:not(:last-child) input,
+.ui-field-group > *:not(:last-child) [role='combobox'] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ui-field-group > *:not(:first-child) input,
+.ui-field-group > *:not(:first-child) [role='combobox'] {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.ui-field-group input:focus,
+.ui-field-group [role='combobox']:focus {
+  position: relative;
+  z-index: 1;
+}
+
+// ── Password ─────────────────────────────────────────────────────────────────
+// Edge/IE añaden su propio control para revelar la contraseña; lo ocultamos para
+// no duplicar el botón de ojo propio (input-text.ts).
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+// ── Range ────────────────────────────────────────────────────────────────────
+// Slider personalizado con tokens: pista redondeada + pulgar Solid 3D que crece
+// al arrastrar (active) y muestra un halo al pasar el cursor o al enfocar.
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  outline: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: linear-gradient(175deg, var(--color-primary-soft), var(--color-primary-strong));
+  border: 1.5px solid var(--color-border-h);
+  box-shadow: var(--elevation-sm);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+input[type='range']::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: linear-gradient(175deg, var(--color-primary-soft), var(--color-primary-strong));
+  border: 1.5px solid var(--color-border-h);
+  box-shadow: var(--elevation-sm);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 6px rgba(74, 143, 231, 0.18),
+    var(--elevation-sm);
+}
+
+input[type='range']:hover::-moz-range-thumb {
+  box-shadow:
+    0 0 0 6px rgba(74, 143, 231, 0.18),
+    var(--elevation-sm);
+}
+
+input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+input[type='range']:active::-moz-range-thumb {
+  transform: scale(1.25);
+}
+
+input[type='range']:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 4px var(--color-focus-ring),
+    var(--elevation-sm);
+}
+
+input[type='range']:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 0 0 4px var(--color-focus-ring),
+    var(--elevation-sm);
+}
+
+input[type='range']:disabled {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  input[type='range']::-webkit-slider-thumb,
+  input[type='range']::-moz-range-thumb {
+    transition: none;
+  }
+}

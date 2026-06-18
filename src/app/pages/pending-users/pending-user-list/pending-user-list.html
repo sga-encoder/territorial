@@ -1,0 +1,41 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header
+    title="Nuevos ingresos"
+    subtitle="Usuarios que iniciaron sesión pero aún no tienen rol asignado en el sistema."
+    [actions]="headerActions()"
+  />
+
+  @if (service.error(); as errorMsg) {
+    <ui-text color="danger">{{ errorMsg }}</ui-text>
+  }
+
+  <ui-card>
+    <ui-filter
+      [config]="filterConfig"
+      [data]="rows()"
+      (filteredChange)="onFiltered($event)"
+    />
+  </ui-card>
+
+  <ui-card [padded]="false">
+    @if (service.isLoading()) {
+      <div class="pending-user-list__loading">
+        <ui-spinner size="lg" label="Cargando usuarios pendientes…" />
+      </div>
+    } @else if (rows().length === 0) {
+      <ui-empty-state
+        icon="user"
+        title="Sin nuevos ingresos"
+        message="No hay usuarios esperando clasificación."
+      />
+    } @else {
+      <ui-dynamic-table
+        [formControl]="selectionControl"
+        [columns]="columns"
+        [rows]="filteredRows()"
+        selectionMode="multiple"
+        emptyMessage="No hay resultados para los filtros aplicados."
+      />
+    }
+  </ui-card>
+</ui-container>

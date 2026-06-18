@@ -1,0 +1,171 @@
+// Design tokens — single source of truth for every THEMABLE value in the app
+// (CLAUDE.md, UI Kit). Palette: "Glass + Solid 3D" redesign (azul #4A8FE7 sobre
+// fondos azul-noche). Static tokens (radius, blur, motion) live in tailwind.css
+// under @theme; THIS file owns everything that flips between dark and light,
+// plus cross-scheme tokens components read at runtime. Utilities consume these
+// through the @theme inline mapping in tailwind.css — never hardcode a color.
+//
+// Material duality (docs/ui-kit/theming.md): glass where it floats, solid-3D
+// where it reads. The 3D volume comes from the border differential
+// (--color-3d-hi top/left = light, --color-3d-dk bottom/right = shadow) plus a
+// soft back shadow — never from inner shadows on top of the object.
+//
+// Dark is the product default (:root). Light applies when <html> carries
+// data-theme='light' — owned by ThemeService (src/app/components/ui/theme) and
+// pre-applied by the inline script in index.html to avoid a first-paint flash.
+//
+// CONTRASTE: cada par texto/superficie está verificado WCAG AA. En light las
+// superficies son tintadas (más oscuras que el blanco), así que varios tokens
+// de texto se OSCURECEN respecto al prompt para mantener 4.5:1 (ver notas «AA»).
+:root {
+  color-scheme: dark;
+
+  // Fondos
+  --color-background: #181c2e;
+  --color-surface: #1e2338;
+  --color-surface-muted: #252a40;
+
+  // Primario (azul)
+  --color-primary: #4a8fe7;
+  --color-primary-strong: #2d6ec7; // solid control bg: white reaches AA (≈5:1)
+  --color-primary-soft: #7aaff0; // primary-tinted text/links on dark (≈6:1)
+  --color-primary-tint: rgba(74, 143, 231, 0.14); // translucent fill for Badge/Chip
+  --color-on-primary: #ffffff; // text over any *-strong solid background
+
+  // Texto
+  --color-text: rgba(255, 255, 255, 0.92);
+  --color-text-muted: rgba(255, 255, 255, 0.5); // ≈4.7:1 sobre surface (AA)
+
+  // Borde
+  --color-border: rgba(130, 150, 255, 0.16);
+  --color-border-h: rgba(150, 170, 255, 0.28); // hover / top highlight (border-h)
+
+  // Danger (rojo)
+  --color-danger: #e87575; // ≈5:1 text sobre fondos dark (AA)
+  --color-danger-strong: #b03838; // destructive solid bg: white reaches AA (≈6:1)
+  --color-danger-tint: rgba(217, 85, 85, 0.14);
+
+  // Status — base = texto legible sobre el fondo actual; -strong = fondo sólido
+  // para texto blanco; -tint = relleno translúcido con la base como texto.
+  --color-success: #5dc898;
+  --color-success-strong: #268a5e;
+  --color-success-tint: rgba(58, 173, 122, 0.14);
+  --color-warning: #fbbf24;
+  --color-warning-strong: #b45309;
+  --color-warning-tint: rgba(251, 191, 36, 0.14);
+  --color-info: #7aaff0;
+  --color-info-strong: #2d6ec7;
+  --color-info-tint: rgba(74, 143, 231, 0.14);
+
+  // Focus — anillo visible (WCAG 2.4.7 / 2.4.11). El grosor global (3px) vive en
+  // styles.scss para que el alpha 0.45 siga leyéndose como indicador.
+  --color-focus-ring: rgba(74, 143, 231, 0.45);
+
+  // Backdrop (velo de Modal/Drawer)
+  --color-backdrop: rgba(0, 0, 0, 0.48);
+
+  // Glass — azulado oscuro, NUNCA blanco lechoso. El highlight es la línea de luz
+  // superior que unifica glass y solid en todo el sistema.
+  --color-glass-surface: rgba(90, 110, 200, 0.07);
+  // Glass "fuerte": para menús flotantes que deben LEERSE (Select, Dropdown).
+  // Casi opaco (sobre el surface) + un punto de translucidez con el blur.
+  --color-glass-strong: rgba(28, 33, 54, 0.97);
+  --color-glass-border: rgba(130, 150, 255, 0.16);
+  --color-glass-highlight: rgba(160, 180, 255, 0.1);
+  --color-surface-highlight: rgba(160, 180, 255, 0.08); // línea sutil para sólidos
+
+  // Sombras traseras — difusas y naturales, NUNCA duras ni encima del objeto.
+  --elevation-sm: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.25);
+  --elevation-md: 0 8px 28px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.32);
+  --elevation-lg: 0 12px 36px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.35);
+  --elevation-xl: 0 20px 52px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.38);
+
+  // Sombras de color para botones (reposo suave → hover intenso lo define el componente).
+  --elevation-blue: 0 4px 18px rgba(74, 143, 231, 0.22);
+  --elevation-green: 0 4px 18px rgba(58, 173, 122, 0.22);
+  --elevation-red: 0 4px 18px rgba(217, 85, 85, 0.22);
+
+  // Diferencial de bordes 3D mate (luz arriba/izquierda, sombra abajo/derecha).
+  --color-3d-hi: rgba(160, 180, 255, 0.1);
+  --color-3d-dk: rgba(0, 0, 0, 0.28);
+
+  // Inputs glass (cavidad hundida en vacío → solid-3D al llenarse). Alpha bajo
+  // para que el blur del backdrop se PERCIBA en reposo (cristal, no sólido).
+  --color-input-bg: rgba(20, 28, 80, 0.22);
+  --color-input-bg-h: rgba(25, 34, 95, 0.3);
+  --color-input-bg-f: rgba(30, 40, 110, 0.4);
+  --color-input-bdr-t: rgba(80, 100, 200, 0.12);
+  --color-input-bdr-b: rgba(130, 160, 255, 0.28);
+  --color-input-bdr-bf: rgba(74, 143, 231, 0.75);
+
+  // Tipografía (cross-scheme: mismo valor en ambos temas). Fredoka para el
+  // contenido (--font-sans, body) y Rubik para los títulos (--font-display).
+  --font-sans: 'Fredoka', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --font-display: 'Rubik', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+
+// Light scheme — cada token themable tiene su contraparte aquí para que los
+// componentes sigan siendo ciegos al tema (sin variantes `dark:`). Las
+// superficies son tintadas, por eso los textos de color van más oscuros (AA).
+[data-theme='light'] {
+  color-scheme: light;
+
+  --color-background: #c8d4ec;
+  --color-surface: #d4deef;
+  --color-surface-muted: #dce5f5;
+
+  --color-primary: #4a8fe7;
+  --color-primary-strong: #2d6ec7; // white ≈5:1 (AA solid bg)
+  --color-primary-soft: #245eaa; // AA: #2D6EC7 del prompt daba 3.7:1; #245EAA ≈4.8:1
+  --color-primary-tint: rgba(74, 143, 231, 0.12);
+  --color-on-primary: #ffffff;
+
+  --color-text: rgba(14, 18, 48, 0.92);
+  --color-text-muted: rgba(14, 18, 48, 0.65); // AA: 0.52 del prompt daba 3.3:1; 0.65 ≈4.8:1
+
+  --color-border: rgba(60, 80, 200, 0.18);
+  --color-border-h: rgba(60, 80, 200, 0.34);
+
+  --color-danger: #b91c1c; // AA: #D95555 del prompt daba 2.9:1; red-700 ≈4.8:1
+  --color-danger-strong: #b03838;
+  --color-danger-tint: rgba(217, 85, 85, 0.12);
+
+  --color-success: #065f46; // AA: #3AAD7A del prompt daba 2.1:1; emerald-800 ≈5.7:1
+  --color-success-strong: #047857; // AA: white sobre #268A5E daba 4.3:1; emerald-700 ≈5.5:1
+  --color-success-tint: rgba(58, 173, 122, 0.12);
+  --color-warning: #92400e; // AA: #B45309 del prompt daba 3.7:1; amber-900 ≈5.2:1
+  --color-warning-strong: #b45309;
+  --color-warning-tint: rgba(180, 83, 9, 0.12);
+  --color-info: #245eaa; // AA: igual que primary-soft
+  --color-info-strong: #2d6ec7;
+  --color-info-tint: rgba(74, 143, 231, 0.12);
+
+  --color-focus-ring: rgba(74, 143, 231, 0.4);
+
+  --color-backdrop: rgba(14, 18, 48, 0.45);
+
+  --color-glass-surface: rgba(255, 255, 255, 0.3);
+  --color-glass-strong: rgba(244, 247, 253, 0.95);
+  --color-glass-border: rgba(60, 80, 200, 0.18);
+  --color-glass-highlight: rgba(255, 255, 255, 0.65);
+  --color-surface-highlight: rgba(255, 255, 255, 0.6);
+
+  --elevation-sm: 0 4px 14px rgba(40, 60, 160, 0.16), 0 1px 4px rgba(40, 60, 160, 0.08);
+  --elevation-md: 0 8px 24px rgba(40, 60, 160, 0.2), 0 2px 8px rgba(40, 60, 160, 0.1);
+  --elevation-lg: 0 12px 32px rgba(40, 60, 160, 0.22), 0 4px 12px rgba(40, 60, 160, 0.12);
+  --elevation-xl: 0 20px 48px rgba(40, 60, 160, 0.26), 0 6px 18px rgba(40, 60, 160, 0.14);
+
+  --elevation-blue: 0 4px 18px rgba(74, 143, 231, 0.2);
+  --elevation-green: 0 4px 18px rgba(58, 173, 122, 0.2);
+  --elevation-red: 0 4px 18px rgba(217, 85, 85, 0.2);
+
+  --color-3d-hi: rgba(255, 255, 255, 0.6);
+  --color-3d-dk: rgba(60, 80, 200, 0.12);
+
+  --color-input-bg: rgba(60, 80, 200, 0.07);
+  --color-input-bg-h: rgba(60, 80, 200, 0.11);
+  --color-input-bg-f: rgba(60, 80, 200, 0.14);
+  --color-input-bdr-t: rgba(60, 80, 200, 0.1);
+  --color-input-bdr-b: rgba(60, 80, 200, 0.3);
+  --color-input-bdr-bf: rgba(74, 143, 231, 0.7);
+}

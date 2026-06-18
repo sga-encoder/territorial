@@ -1,54 +1,71 @@
+# CLAUDE.md — Technical Rules
 
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+## Language
 
-## TypeScript Best Practices
+Prompt is in English. Always respond in Spanish.
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid the `any` type; use `unknown` when type is uncertain
+---
 
-## Angular Best Practices
+## Role
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
-- Use signals for state management
-- Implement lazy loading for feature routes
-- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
-- Use `NgOptimizedImage` for all static images.
-  - `NgOptimizedImage` does not work for inline base64 images.
+Expert in TypeScript, Angular, Tailwind CSS, and SCSS.
+Write functional, maintainable, performant, and accessible code.
 
-## Accessibility Requirements
+---
 
-- It MUST pass all AXE checks.
-- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+## TypeScript
 
-### Components
+- Strict type checking always
+- No `any` — use `unknown` when type is uncertain
+- Variable names: English, explicit, descriptive — no single letters except loop indices (`i`, `j`, `k`)
+- Constants: UPPER_SNAKE_CASE
 
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `computed()` for derived state
-- Prefer inline templates for small components
-- Prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- When using external templates/styles, use paths relative to the component TS file.
+---
 
-## State Management
+## Angular
 
-- Use signals for local component state
-- Use `computed()` for derived state
-- Keep state transformations pure and predictable
-- Do NOT use `mutate` on signals, use `update` or `set` instead
+- Standalone components only — never set `standalone: true` (default in v20+)
+- Signals for local state — `update` or `set`, never `mutate`
+- `computed()` for derived state
+- Lazy loading for all feature routes
+- `input()` and `output()` functions — no decorators
+- Native control flow: `@if`, `@for`, `@switch` — no `*ngIf`, `*ngFor`, `*ngSwitch`
+- `inject()` function — no constructor injection
+- `host` object — no `@HostBinding` or `@HostListener`
+- `NgOptimizedImage` for all static images
+- Reactive Forms — no Template-driven
+- `class` bindings — no `ngClass`
+- `style` bindings — no `ngStyle`
+- `providedIn: 'root'` for singleton services
 
-## Templates
+---
 
-- Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
-- Do not assume globals like (`new Date()`) are available.
+## Styles — Tailwind + SCSS
 
-## Services
+- Tailwind for layout, spacing, and responsive utilities
+- SCSS only for complex animations
+- All colors must be defined as CSS variables in `styles/_variables.scss` — never hardcoded
+- Mobile-first always
+- No `!important`
+- No inline styles
+- Permanent dark mode
 
-- Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Use the `inject()` function instead of constructor injection
+---
+
+## Structure Rules
+
+- Interfaces: individual files inside `models/`
+- When a component is created: add usage doc + example in `docs/`
+- Business rules and domain contracts live in `spec.md` — read it before implementing anything
+- **`spec.md` is READ-ONLY — never modify, rename, or delete it under any circumstance**
+- Tests are generated from the Validation section in `spec.md` — never written manually
+
+---
+
+## Code Quality
+
+- No repeated logic or large duplicated blocks
+- Readability over abstraction — no over-engineering in the name of DRY
+- One responsibility per component and service
+
+---

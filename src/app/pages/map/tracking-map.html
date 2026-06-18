@@ -1,0 +1,44 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header
+    title="Mapa de seguimiento"
+    subtitle="Ubicación GPS de los funcionarios activos en tiempo real."
+  />
+
+  <ui-container center="vertical" [gap]="3" wrap>
+    <ui-select
+      [formControl]="entityControl"
+      label="Entidad"
+      placeholder="Todas las entidades"
+      [options]="entityOptions()"
+    />
+    <ui-badge variant="success">{{ onlineCount() }} en línea</ui-badge>
+    @if (staleCount() > 0) {
+      <ui-badge variant="warning">{{ staleCount() }} sin señal</ui-badge>
+    }
+    @if (trackingService.isLoading()) {
+      <ui-spinner size="sm" color="muted" label="Actualizando posiciones" />
+    }
+  </ui-container>
+
+  <ui-card [padded]="false">
+    <div class="tracking-map-wrapper">
+      <div
+        #mapContainer
+        class="tracking-map-canvas"
+        [class.tracking-map-canvas--hidden]="hasNoMappable()"
+        role="application"
+        aria-label="Mapa de seguimiento de funcionarios"
+      ></div>
+
+      @if (hasNoMappable()) {
+        <div class="tracking-map-overlay" role="status" aria-live="polite">
+          <ui-empty-state
+            icon="map-pin"
+            title="Sin posición disponible"
+            [message]="emptyMessage()"
+          />
+        </div>
+      }
+    </div>
+  </ui-card>
+</ui-container>

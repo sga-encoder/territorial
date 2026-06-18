@@ -1,0 +1,43 @@
+<ui-container direction="column" [gap]="6">
+  <ui-page-header title="Categorías de anotación" [subtitle]="subtitle()" [actions]="headerActions" />
+
+  @if (linkService.error(); as errorMessage) {
+    <ui-card>
+      <ui-container justify="between" center="vertical" [gap]="3" wrap>
+        <ui-text color="danger">{{ errorMessage }}</ui-text>
+        <ui-button variant="secondary" size="sm" (clicked)="linkService.loadAll()">
+          Reintentar
+        </ui-button>
+      </ui-container>
+    </ui-card>
+  }
+
+  @if (!linkService.isLoading() && !linkService.hasLinks()) {
+    <ui-card>
+      <ui-empty-state
+        icon="search"
+        title="Aún no hay vínculos registrados"
+        message="Asigna una categoría a una anotación para clasificarla."
+      >
+        <ui-button variant="secondary" size="sm" (clicked)="openCreate()">
+          <ui-icon name="plus" size="sm" />
+          Crear vínculo
+        </ui-button>
+      </ui-empty-state>
+    </ui-card>
+  } @else {
+    <ui-card>
+      <ui-filter [config]="filterConfig()" [data]="rows()" (filteredChange)="onFiltered($event)" />
+    </ui-card>
+
+    <ui-dynamic-table
+      [columns]="columns"
+      [rows]="filteredRows()"
+      [actions]="actions"
+      [loading]="linkService.isLoading()"
+      emptyMessage="Ningún vínculo coincide con los filtros"
+      rowKey="id"
+      [pageSize]="8"
+    />
+  }
+</ui-container>

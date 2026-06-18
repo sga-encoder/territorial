@@ -1,0 +1,294 @@
+<div class="flex flex-col gap-3 min-h-[calc(100dvh-7rem)]">
+
+  <!-- Page header -->
+  <ui-page-header title="Demarcación de barrios" [subtitle]="subtitle" [actions]="headerActions()" />
+
+  @if (loadError(); as errorMessage) {
+    <ui-card>
+      <ui-container justify="between" center="vertical" [gap]="3" wrap>
+        <ui-text color="danger">{{ errorMessage }}</ui-text>
+        <ui-button variant="secondary" size="sm" (clicked)="reloadCurrent()">Reintentar</ui-button>
+      </ui-container>
+    </ui-card>
+  }
+
+  <!-- Map + Right tools sidebar -->
+  <div class="flex flex-1 gap-3 overflow-hidden min-h-0">
+
+    <!-- ── Map container ───────────────────────────────────────────── -->
+    <div class="relative flex-1 min-w-0 rounded-2xl overflow-hidden border border-glass-border">
+      @if (neighborhood() === null) {
+        <div class="flex h-full items-center justify-center bg-surface/40">
+          <ui-empty-state
+            icon="waypoints"
+            title="Elige un barrio para demarcar"
+            message="Selecciona un barrio en el panel derecho para ver su polígono o trazar uno nuevo."
+          />
+        </div>
+      } @else {
+        @if (loading()) {
+          <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface/60 backdrop-blur-sm">
+            <ui-container center="vertical" [gap]="2">
+              <ui-spinner size="md" />
+              <ui-text color="muted">Cargando polígono…</ui-text>
+            </ui-container>
+          </div>
+        }
+        <div class="h-full w-full">
+          <app-polygon-map [overviewPolygons]="overviewPolygons()" />
+        </div>
+
+        <!-- Map overlay: zoom + center controls (bottom-right corner) -->
+        <div class="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
+          <ui-button
+            variant="secondary"
+            size="sm"
+            (clicked)="zoomIn()"
+            aria-label="Acercar"
+          >
+            <ui-icon name="plus" size="sm" />
+          </ui-button>
+          <ui-button
+            variant="secondary"
+            size="sm"
+            (clicked)="zoomOut()"
+            aria-label="Alejar"
+          >
+            <ui-icon name="minus" size="sm" />
+          </ui-button>
+          <ui-button
+            variant="secondary"
+            size="sm"
+            [disabled]="state.vertexCount() === 0"
+            (clicked)="fitToPolygon()"
+            aria-label="Centrar vista"
+          >
+            <ui-icon name="locate" size="sm" />
+          </ui-button>
+        </div>
+      }
+    </div>
+
+    <!-- ── Right collapsible tools sidebar ─────────────────────────── -->
+    <div
+      class="flex flex-col gap-3 overflow-hidden shrink-0 transition-[width] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+      [class.w-68]="toolsOpen()"
+      [class.w-13]="!toolsOpen()"
+    >
+      <!-- Toggle button -->
+      <button
+        type="button"
+        class="flex h-9 w-full shrink-0 items-center justify-center rounded-2xl border border-glass-border bg-glass-surface text-muted backdrop-blur-glass transition-[background-color,color] duration-200 hover:bg-primary-tint hover:text-primary"
+        (click)="toolsOpen.update(v => !v)"
+        [attr.title]="toolsOpen() ? 'Cerrar panel de herramientas' : 'Abrir panel de herramientas'"
+        [attr.aria-label]="toolsOpen() ? 'Cerrar panel de herramientas' : 'Abrir panel de herramientas'"
+        [attr.aria-expanded]="toolsOpen()"
+      >
+        <ui-icon [name]="toolsOpen() ? 'panel-right-close' : 'panel-right-open'" size="sm" />
+      </button>
+
+      @if (toolsOpen()) {
+        <div class="flex flex-1 flex-col gap-3 overflow-y-auto pr-0.5">
+
+          <!-- Ciudad + Barrio selectors -->
+          <ui-card>
+            <ui-container direction="column" [gap]="3">
+              <ui-select
+                label="Ciudad"
+                iconStart="map-pin"
+                placeholder="Filtrar por ciudad…"
+                [options]="cityOptions()"
+                [formControl]="cityControl"
+              />
+              <ui-select
+                label="Barrio"
+                iconStart="waypoints"
+                placeholder="Selecciona un barrio…"
+                [options]="neighborhoodOptions()"
+                [formControl]="neighborhoodControl"
+              />
+            </ui-container>
+          </ui-card>
+
+          <!-- Edit tools -->
+          <ui-card>
+            <ui-container direction="column" [gap]="3">
+              <ui-text variant="label" color="muted">Edición</ui-text>
+              <ui-button
+                [variant]="state.isEditing() ? 'secondary' : 'primary'"
+                (clicked)="toggleEdit()"
+              >
+                <ui-icon [name]="state.isEditing() ? 'check' : 'move'" size="sm" />
+                {{ state.isEditing() ? 'Salir de edición' : 'Editar polígono' }}
+              </ui-button>
+
+              @if (state.isEditing()) {
+                <ui-container [gap]="2" wrap>
+                  <ui-button
+                    variant="ghost"
+                    size="sm"
+                    [disabled]="!state.canUndo()"
+                    (clicked)="state.undo()"
+                  >
+                    <ui-icon name="undo" size="sm" />
+                    Deshacer
+                  </ui-button>
+                  <ui-button
+                    variant="ghost"
+                    size="sm"
+                    [disabled]="state.selectedClientId() === null"
+                    (clicked)="state.removeSelected()"
+                  >
+                    <ui-icon name="trash" size="sm" />
+                    Quitar vértice
+                  </ui-button>
+                  <ui-button
+                    variant="ghost"
+                    size="sm"
+                    [disabled]="state.vertexCount() === 0"
+                    (clicked)="clearAll()"
+                  >
+                    <ui-icon name="trash" size="sm" />
+                    Limpiar
+                  </ui-button>
+                </ui-container>
+              }
+            </ui-container>
+          </ui-card>
+
+          <!-- Status (only when a neighborhood is loaded) -->
+          @if (neighborhood(); as nbh) {
+            <ui-card>
+              <ui-container direction="column" [gap]="3">
+                <ui-container justify="between" center="vertical" [gap]="2">
+                  <ui-title [level]="6">{{ nbh.name }}</ui-title>
+                  <ui-badge [variant]="statusBadge().variant">{{ statusBadge().label }}</ui-badge>
+                </ui-container>
+
+                <ui-container [gap]="4" center="vertical" wrap>
+                  <ui-text variant="caption">Vértices: {{ state.vertexCount() }}</ui-text>
+                  @if (state.isDirty()) {
+                    <ui-text variant="caption" color="warning">Cambios sin guardar</ui-text>
+                  }
+                </ui-container>
+
+                @if (validationHint(); as hint) {
+                  <ui-text variant="caption" color="warning">{{ hint }}</ui-text>
+                }
+
+                <ui-text variant="caption" color="muted">
+                  {{
+                    state.isEditing()
+                      ? 'Haz clic en el mapa para agregar vértices, arrástralos para moverlos y doble clic para eliminarlos.'
+                      : 'Activa la edición para modificar el polígono del barrio.'
+                  }}
+                </ui-text>
+              </ui-container>
+            </ui-card>
+
+            <!-- Vertices list -->
+            <ui-card>
+              <ui-container direction="column" [gap]="3">
+                <ui-container justify="between" center="vertical">
+                  <ui-text variant="label" color="muted">Vértices</ui-text>
+                  <ui-text variant="caption" color="muted">{{ state.vertexCount() }}</ui-text>
+                </ui-container>
+
+                @if (state.vertexCount() === 0) {
+                  <ui-empty-state
+                    icon="waypoints"
+                    title="Sin vértices"
+                    message="Activa la edición y traza el polígono sobre el mapa."
+                  />
+                } @else {
+                  <div class="max-h-64 overflow-y-auto pr-1">
+                    <ui-container direction="column" [gap]="1">
+                      @for (
+                        vertex of state.vertices();
+                        track vertex.clientId;
+                        let index = $index;
+                        let last = $last
+                      ) {
+                        <ui-container justify="between" center="vertical" [gap]="2">
+                          <ui-button variant="ghost" size="sm" (clicked)="state.select(vertex.clientId)">
+                            <ui-chip
+                              [variant]="
+                                vertex.clientId === state.selectedClientId() ? 'primary' : 'neutral'
+                              "
+                            >
+                              {{ index + 1 }}
+                            </ui-chip>
+                            <ui-text variant="caption" color="muted">
+                              {{ formatCoordinate(vertex.latitude) }},
+                              {{ formatCoordinate(vertex.longitude) }}
+                            </ui-text>
+                          </ui-button>
+
+                          <ui-container [gap]="1" center="vertical">
+                            <ui-button
+                              variant="ghost"
+                              size="sm"
+                              [disabled]="!state.isEditing() || index === 0"
+                              (clicked)="state.reorderVertex(vertex.clientId, -1)"
+                            >
+                              <ui-icon name="chevron-up" size="sm" />
+                              <span class="sr-only">Subir vértice</span>
+                            </ui-button>
+                            <ui-button
+                              variant="ghost"
+                              size="sm"
+                              [disabled]="!state.isEditing() || last"
+                              (clicked)="state.reorderVertex(vertex.clientId, 1)"
+                            >
+                              <ui-icon name="chevron-down" size="sm" />
+                              <span class="sr-only">Bajar vértice</span>
+                            </ui-button>
+                            <ui-button
+                              variant="ghost"
+                              size="sm"
+                              [disabled]="!state.isEditing()"
+                              (clicked)="state.removeVertex(vertex.clientId)"
+                            >
+                              <ui-icon name="trash" size="sm" color="danger" />
+                              <span class="sr-only">Eliminar vértice</span>
+                            </ui-button>
+                          </ui-container>
+                        </ui-container>
+
+                        @if (!last) {
+                          <ui-divider />
+                        }
+                      }
+                    </ui-container>
+                  </div>
+                }
+              </ui-container>
+            </ui-card>
+          }
+        </div>
+      } @else {
+        <!-- Collapsed tools sidebar: icon-only column -->
+        <div class="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-2xl border border-glass-border bg-glass-surface text-muted transition-[background-color,color] duration-200 hover:bg-primary-tint hover:text-primary"
+            (click)="toggleEdit()"
+            [attr.title]="state.isEditing() ? 'Salir de edición' : 'Editar polígono'"
+            [attr.aria-label]="state.isEditing() ? 'Salir de edición' : 'Editar polígono'"
+          >
+            <ui-icon [name]="state.isEditing() ? 'check' : 'move'" size="sm" />
+          </button>
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-2xl border border-glass-border bg-glass-surface text-muted transition-[background-color,color] duration-200 hover:bg-primary-tint hover:text-primary disabled:opacity-40"
+            [disabled]="!state.canUndo()"
+            (click)="state.undo()"
+            aria-label="Deshacer"
+          >
+            <ui-icon name="undo" size="sm" />
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

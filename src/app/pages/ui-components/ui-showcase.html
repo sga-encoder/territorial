@@ -1,0 +1,865 @@
+<ui-container direction="column" [gap]="8">
+  <!-- Fondo de página (capa visual): fixed inset-0, fuera del flujo — no afecta el layout. -->
+  <ui-particles-background density="balanced" pointerEffect="repel" />
+
+  <!-- Escenario glass (capa visual): flota sobre el fondo (z-20). El contenido va dentro,
+       nítido y legible; el fondo se percibe desenfocado a través del cristal. -->
+  <ui-glass-stage>
+    <ui-container direction="column" [gap]="8">
+  <header>
+    <ui-container justify="between" center="vertical" [gap]="4" wrap>
+      <ui-container direction="column" [gap]="2">
+        <ui-title [level]="1">UI Kit</ui-title>
+        <ui-text color="muted">
+          Design system de Territorial: 26 componentes en 7 capas, theming completo por tokens.
+          Documentación viva del sistema — los ejemplos de código viven en src/docs/ui-kit/.
+        </ui-text>
+        <ui-text variant="caption">
+          Sistema completo: capas 0 (theming) a 6 (showcase) · reglas RN-UI-01…08 en spec.md
+        </ui-text>
+      </ui-container>
+      <ui-button variant="secondary" (clicked)="theme.toggle()">
+        <ui-icon [name]="theme.isDark() ? 'sun' : 'moon'" size="sm" />
+        {{ theme.isDark() ? 'Tema claro' : 'Tema oscuro' }}
+      </ui-button>
+    </ui-container>
+  </header>
+
+  <nav aria-label="Índice de componentes">
+    <ui-card elevated>
+      <ui-container direction="column" [gap]="2">
+        <ui-title [level]="6">Índice por capas</ui-title>
+        @for (group of sectionIndex; track group.layer) {
+          <ui-container [gap]="1" center="vertical" wrap>
+            <ui-text variant="label" color="muted">{{ group.layer }}</ui-text>
+            @for (section of group.sections; track section.id) {
+              <ui-button variant="ghost" size="sm" (clicked)="scrollToSection(section.id)">
+                {{ section.label }}
+              </ui-button>
+            }
+          </ui-container>
+        }
+      </ui-container>
+    </ui-card>
+  </nav>
+
+  <ui-divider />
+
+  <section id="container">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Container</ui-title>
+      <ui-text color="muted">
+        Átomo de layout: flex o grid, alineación, gap y presets de centrado. El preset center
+        siembra defaults y align/justify granulares ganan en su propio eje (RN-UI-04).
+      </ui-text>
+
+      <ui-text variant="label">Fila con gap y centrado vertical (center="vertical")</ui-text>
+      <ui-container [gap]="4" center="vertical">
+        <ui-title [level]="3">Grande</ui-title>
+        <ui-text>mediano</ui-text>
+        <ui-text variant="caption">pequeño</ui-text>
+      </ui-container>
+
+      <ui-text variant="label">Distribución justify="between"</ui-text>
+      <ui-container justify="between">
+        <ui-text>izquierda</ui-text>
+        <ui-text>centro</ui-text>
+        <ui-text>derecha</ui-text>
+      </ui-container>
+
+      <ui-text variant="label">Grid de 3 columnas ([cols]="3")</ui-text>
+      <ui-container layout="grid" [cols]="3" [gap]="4">
+        <ui-text>celda 1</ui-text>
+        <ui-text>celda 2</ui-text>
+        <ui-text>celda 3</ui-text>
+        <ui-text>celda 4</ui-text>
+        <ui-text>celda 5</ui-text>
+        <ui-text>celda 6</ui-text>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="text">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Text</ui-title>
+      <ui-text color="muted">
+        Texto corrido en tres variantes; cada una trae color y peso por defecto, sobreescribibles
+        con los inputs color y weight.
+      </ui-text>
+
+      <ui-container direction="column" [gap]="2">
+        <ui-text>variant="body" — texto principal de lectura.</ui-text>
+        <ui-text variant="caption">variant="caption" — anotación secundaria, muted por defecto.</ui-text>
+        <ui-text variant="label">variant="label" — etiqueta de formulario, peso medio.</ui-text>
+      </ui-container>
+
+      <ui-container [gap]="4" wrap>
+        <ui-text color="default">default</ui-text>
+        <ui-text color="muted">muted</ui-text>
+        <ui-text color="primary">primary</ui-text>
+        <ui-text color="success">success</ui-text>
+        <ui-text color="warning">warning</ui-text>
+        <ui-text color="danger">danger</ui-text>
+        <ui-text color="info">info</ui-text>
+      </ui-container>
+
+      <ui-container [gap]="4" wrap>
+        <ui-text weight="normal">normal</ui-text>
+        <ui-text weight="medium">medium</ui-text>
+        <ui-text weight="semibold">semibold</ui-text>
+        <ui-text weight="bold">bold</ui-text>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="title">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Title</ui-title>
+      <ui-text color="muted">
+        Encabezados nivel 1–6 con jerarquía accesible (role="heading" + aria-level) y colores
+        default, muted y primary.
+      </ui-text>
+
+      <ui-container direction="column" [gap]="2">
+        <ui-title [level]="1">Nivel 1</ui-title>
+        <ui-title [level]="2">Nivel 2</ui-title>
+        <ui-title [level]="3">Nivel 3</ui-title>
+        <ui-title [level]="4">Nivel 4</ui-title>
+        <ui-title [level]="5">Nivel 5</ui-title>
+        <ui-title [level]="6">Nivel 6</ui-title>
+        <ui-title [level]="4" color="muted">Nivel 4 · color="muted"</ui-title>
+        <ui-title [level]="4" color="primary">Nivel 4 · color="primary"</ui-title>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="divider">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Divider</ui-title>
+      <ui-text color="muted">
+        Separador horizontal o vertical; el vertical se estira dentro de un Container en fila.
+      </ui-text>
+
+      <ui-divider />
+
+      <ui-container [gap]="4">
+        <ui-text>Sección A</ui-text>
+        <ui-divider orientation="vertical" />
+        <ui-text>Sección B</ui-text>
+        <ui-divider orientation="vertical" />
+        <ui-text>Sección C</ui-text>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="button">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Button</ui-title>
+      <ui-text color="muted">
+        Acción en cuatro variantes y tres tamaños; loading muestra spinner y bloquea la
+        interacción (aria-busy).
+      </ui-text>
+
+      <ui-text variant="label">Variantes</ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-button>primary</ui-button>
+        <ui-button variant="secondary">secondary</ui-button>
+        <ui-button variant="ghost">ghost</ui-button>
+        <ui-button variant="danger">danger</ui-button>
+      </ui-container>
+
+      <ui-text variant="label">Tamaños</ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-button size="sm">small</ui-button>
+        <ui-button size="md">medium</ui-button>
+        <ui-button size="lg">large</ui-button>
+      </ui-container>
+
+      <ui-text variant="label">Estados</ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-button [loading]="true">guardando…</ui-button>
+        <ui-button [disabled]="true">disabled</ui-button>
+        <ui-button variant="secondary">
+          <ui-icon name="plus" size="sm" />
+          con ícono
+        </ui-button>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="icon">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Icon</ui-title>
+      <ui-text color="muted">
+        Subset curado de lucide vía &#64;ng-icons (RN-UI-06): nombres tipados (IconName), color
+        por tokens y currentColor por defecto.
+      </ui-text>
+
+      <ui-container [gap]="6" wrap>
+        @for (iconName of iconNames; track iconName) {
+          <ui-container direction="column" center="horizontal" [gap]="1">
+            <ui-icon [name]="iconName" />
+            <ui-text variant="caption">{{ iconName }}</ui-text>
+          </ui-container>
+        }
+      </ui-container>
+
+      <ui-text variant="label">Tamaños y colores</ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-icon name="map-pin" size="sm" />
+        <ui-icon name="map-pin" size="md" />
+        <ui-icon name="map-pin" size="lg" />
+        <ui-icon name="success" color="success" />
+        <ui-icon name="warning" color="warning" />
+        <ui-icon name="error" color="danger" />
+        <ui-icon name="info" color="info" />
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="spinner">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Spinner</ui-title>
+      <ui-text color="muted">
+        Indicador de progreso indeterminado, anunciado con role="status".
+      </ui-text>
+      <ui-container [gap]="6" center="vertical" wrap>
+        <ui-spinner size="sm" />
+        <ui-spinner />
+        <ui-spinner size="lg" />
+        <ui-spinner color="muted" />
+        <ui-spinner color="danger" />
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="avatar">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Avatar</ui-title>
+      <ui-text color="muted">
+        Avatar generado con DiceBear "dylan" a partir de una semilla (colores de la marca), o
+        foto con fallback automático a iniciales cuando no hay imagen o falla la carga.
+      </ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-avatar seed="ana-lopez" alt="Ana López" size="sm" />
+        <ui-avatar seed="carlos-marin" alt="Carlos Marín" />
+        <ui-avatar seed="diana-rios" alt="Diana Ríos" size="lg" />
+        <ui-avatar initials="sg" />
+        <ui-avatar src="/foto-inexistente.jpg" initials="ft" alt="Fallback tras error de imagen" />
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="toggle">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Toggle</ui-title>
+      <ui-text color="muted">
+        Interruptor on/off sin estado: refleja `checked` y emite `toggled`. Puede llevar un
+        icono por estado (el de la navbar conmuta el tema).
+      </ui-text>
+      <ui-container [gap]="6" center="vertical" wrap>
+        <ui-toggle
+          [checked]="toggleDemo()"
+          label="Activar opción"
+          (toggled)="toggleDemo.set(!toggleDemo())"
+        />
+        <ui-toggle
+          [checked]="notifyDemo()"
+          iconOn="success"
+          iconOff="close"
+          label="Notificaciones"
+          (toggled)="notifyDemo.set(!notifyDemo())"
+        />
+        <ui-toggle [checked]="true" disabled label="Bloqueado" />
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="card">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Card</ui-title>
+      <ui-text color="muted">
+        Superficie de contenido: sólida por defecto (se lee) y glass con elevated (flota). Header
+        y footer son slots opcionales por projection.
+      </ui-text>
+
+      <ui-container layout="grid" [cols]="2" [gap]="4">
+        <ui-card>
+          <ui-container ui-card-header justify="between" center="vertical">
+            <ui-title [level]="5">Card sólida</ui-title>
+            <ui-badge variant="success" size="sm">activa</ui-badge>
+          </ui-container>
+          <ui-text>
+            Cuerpo de la tarjeta con superficie opaca, borde y línea de highlight superior.
+          </ui-text>
+          <ui-container ui-card-footer justify="end" [gap]="2">
+            <ui-button variant="ghost" size="sm">Cancelar</ui-button>
+            <ui-button size="sm">Guardar</ui-button>
+          </ui-container>
+        </ui-card>
+
+        <ui-card elevated>
+          <ui-title [level]="5" ui-card-header>Card elevated (glass)</ui-title>
+          <ui-text>
+            Variante glass: translúcida, con blur y highlight brillante. Reservada para
+            contenido que flota.
+          </ui-text>
+        </ui-card>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="badge">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Badge</ui-title>
+      <ui-text color="muted">
+        Píldora de estado: tinte translúcido + texto de la misma familia semántica.
+      </ui-text>
+      <ui-container [gap]="3" center="vertical" wrap>
+        <ui-badge>neutral</ui-badge>
+        <ui-badge variant="primary">primary</ui-badge>
+        <ui-badge variant="success">success</ui-badge>
+        <ui-badge variant="warning">warning</ui-badge>
+        <ui-badge variant="danger">danger</ui-badge>
+        <ui-badge variant="info">info</ui-badge>
+        <ui-badge variant="primary" size="sm">size sm</ui-badge>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="chip">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Chip / Tag</ui-title>
+      <ui-text color="muted">
+        Etiqueta para categorías múltiples; removable emite removed y el consumidor actualiza su
+        colección (pruébalo y reinicia).
+      </ui-text>
+      <ui-container [gap]="2" center="vertical" wrap>
+        @for (chipLabel of demoChips(); track chipLabel) {
+          <ui-chip
+            variant="primary"
+            removable
+            [removeLabel]="'Quitar ' + chipLabel"
+            (removed)="removeChip(chipLabel)"
+          >
+            {{ chipLabel }}
+          </ui-chip>
+        }
+        <ui-button variant="ghost" size="sm" (clicked)="resetChips()">Reiniciar</ui-button>
+      </ui-container>
+      <ui-container [gap]="2" wrap>
+        <ui-chip>neutral</ui-chip>
+        <ui-chip variant="success">success</ui-chip>
+        <ui-chip variant="warning">warning</ui-chip>
+        <ui-chip variant="danger">danger</ui-chip>
+        <ui-chip variant="info">info</ui-chip>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="breadcrumbs">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Breadcrumbs</ui-title>
+      <ui-text color="muted">
+        Rastro de ubicación: los ítems con path son enlaces; el último es la página actual
+        (aria-current).
+      </ui-text>
+      <ui-breadcrumbs [items]="demoBreadcrumbs" />
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="table">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Table</ui-title>
+      <ui-text color="muted">
+        Columnas y datos por input; la columna Estado usa un slot de celda (ng-template
+        uiTableCell) para renderizar un Badge.
+      </ui-text>
+
+      <ui-table [columns]="demoColumns" [rows]="demoRows">
+        <ng-template uiTableCell="status" let-row>
+          <ui-badge [variant]="statusVariant(row)" size="sm">{{ row['status'] }}</ui-badge>
+        </ng-template>
+      </ui-table>
+
+      <ui-text variant="label">Estado loading</ui-text>
+      <ui-table [columns]="demoColumns" [rows]="[]" [loading]="true" />
+
+      <ui-text variant="label">Sin registros (emptyMessage)</ui-text>
+      <ui-table [columns]="demoColumns" [rows]="[]" emptyMessage="Sin entidades registradas" />
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="pagination">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Pagination</ui-title>
+      <ui-text color="muted">
+        Paginador controlado: currentPage entra por input y pageChanged pide al consumidor
+        actualizarlo (96 registros, 10 por página).
+      </ui-text>
+      <ui-pagination [total]="96" [pageSize]="10" [currentPage]="demoPage()" (pageChanged)="demoPage.set($event)" />
+      <ui-text variant="caption">Página actual: {{ demoPage() }}</ui-text>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="empty-state">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Empty State</ui-title>
+      <ui-text color="muted">
+        Mensaje de vacío con ícono, título, descripción y slot de acción.
+      </ui-text>
+      <ui-card>
+        <ui-empty-state
+          icon="search"
+          title="Sin resultados"
+          message="Ningún reporte coincide con los filtros aplicados. Ajusta la búsqueda o crea un reporte nuevo."
+        >
+          <ui-button variant="secondary" size="sm">
+            <ui-icon name="plus" size="sm" />
+            Nuevo reporte
+          </ui-button>
+        </ui-empty-state>
+      </ui-card>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="tabs">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Tabs</ui-title>
+      <ui-text color="muted">
+        Patrón WAI-ARIA tabs con activación automática y flechas del teclado; el contenido de
+        cada pestaña se proyecta con ng-template uiTabPanel.
+      </ui-text>
+      <ui-tabs [tabs]="demoTabs">
+        <ng-template uiTabPanel="general">
+          <ui-text>Información general de la entidad: nombre, NIT, contacto y dirección.</ui-text>
+        </ng-template>
+        <ng-template uiTabPanel="map">
+          <ui-text>Aquí iría el mapa con los puntos asociados (feature Mapa, próximamente).</ui-text>
+        </ng-template>
+        <ng-template uiTabPanel="history">
+          <ui-text>Historial de cambios.</ui-text>
+        </ng-template>
+      </ui-tabs>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="forms">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Formularios (CVA)</ui-title>
+      <ui-text color="muted">
+        Los 7 controles dentro de un FormGroup real con validadores. RN-UI-07: los errores
+        aparecen solo al pulsar Enviar y luego se corrigen en vivo. Prueba enviar vacío.
+      </ui-text>
+
+      <ui-card>
+        <form [formGroup]="demoForm" (ngSubmit)="onDemoSubmit()">
+          <ui-container direction="column" [gap]="4">
+            <ui-container layout="grid" [cols]="2" [gap]="4">
+              <ui-input
+                formControlName="name"
+                label="Nombre"
+                placeholder="Nombre completo"
+                iconStart="user"
+                [error]="errorOf(demoForm.controls.name)"
+              />
+              <ui-input
+                formControlName="email"
+                type="email"
+                label="Correo electrónico"
+                placeholder="correo@dominio.com"
+                iconStart="search"
+                iconEnd="check"
+                [error]="errorOf(demoForm.controls.email)"
+              />
+              <ui-select
+                formControlName="city"
+                label="Ciudad"
+                placeholder="Selecciona una ciudad"
+                iconStart="map-pin"
+                [options]="cityOptions"
+                [error]="errorOf(demoForm.controls.city)"
+              />
+              <ui-date
+                formControlName="visitDate"
+                label="Fecha de visita"
+                [error]="errorOf(demoForm.controls.visitDate)"
+              />
+            </ui-container>
+
+            <ui-textarea
+              formControlName="description"
+              label="Descripción"
+              placeholder="Máximo 200 caracteres"
+              [rows]="3"
+              [error]="errorOf(demoForm.controls.description)"
+            />
+
+            <ui-container layout="grid" [cols]="2" [gap]="4">
+              <ui-radio
+                formControlName="role"
+                label="Rol"
+                [options]="roleOptions"
+                [error]="errorOf(demoForm.controls.role)"
+              />
+              <ui-range
+                formControlName="priority"
+                label="Prioridad"
+                [min]="0"
+                [max]="100"
+                [step]="5"
+              />
+            </ui-container>
+
+            <ui-checkbox
+              formControlName="terms"
+              label="Acepto los términos y el tratamiento de datos"
+              [error]="termsError()"
+            />
+
+            <ui-container justify="between" center="vertical" [gap]="4" wrap>
+              <ui-container [gap]="2">
+                <ui-button type="submit">Enviar</ui-button>
+                <ui-button variant="ghost" (clicked)="resetDemoForm()">Reiniciar</ui-button>
+              </ui-container>
+              @if (lastSubmission(); as submission) {
+                <ui-badge variant="success">enviado ✓</ui-badge>
+              }
+            </ui-container>
+
+            @if (lastSubmission(); as submission) {
+              <ui-text variant="caption">{{ submission }}</ui-text>
+            }
+          </ui-container>
+        </form>
+      </ui-card>
+
+      <ui-text variant="label">Estado disabled (setDisabledState del CVA)</ui-text>
+      <ui-container layout="grid" [cols]="2" [gap]="4">
+        <ui-input [formControl]="disabledInput" label="Campo deshabilitado" />
+        <ui-checkbox [formControl]="disabledCheckbox" label="Opción bloqueada por el formulario" />
+      </ui-container>
+
+      <ui-text variant="label">Agrupación de campos (ui-field-group) — sin separación</ui-text>
+      <ui-container direction="column" [gap]="4">
+        <ui-field-group>
+          <ui-input placeholder="Mínimo" iconStart="search" />
+          <ui-input placeholder="Máximo" />
+        </ui-field-group>
+        <ui-field-group>
+          <ui-input placeholder="Buscar entidad" iconStart="search" />
+          <ui-select placeholder="Ciudad" [options]="cityOptions" />
+        </ui-field-group>
+      </ui-container>
+
+      <ui-text variant="label">Contraseña (toggle de visibilidad) y número</ui-text>
+      <ui-container layout="grid" [cols]="2" [gap]="4">
+        <ui-input type="password" label="Contraseña" placeholder="••••••••" iconStart="user" />
+        <ui-input type="number" label="Puntos" placeholder="0" iconStart="plus" />
+      </ui-container>
+
+      <ui-text variant="label">Carga de archivos (arrastrar y soltar)</ui-text>
+      <ui-container layout="grid" [cols]="2" [gap]="4">
+        <ui-file-drop
+          label="Documentos (archivos e imágenes)"
+          multiple
+          hint="Arrastra varios archivos o haz clic"
+          (filesChange)="onFilesSelected($event)"
+        />
+        <ui-file-drop
+          label="Imágenes (solo imágenes, con vista previa)"
+          accept="image/*"
+          multiple
+          hint="PNG, JPG, WEBP"
+          (filesChange)="onFilesSelected($event)"
+        />
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="modal">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Modal</ui-title>
+      <ui-text color="muted">
+        Servicio abrir/cerrar con panel glass: trap de foco básico, cierre con ESC y clic en el
+        backdrop, scroll bloqueado y foco devuelto al disparador. open() resuelve una Promise con
+        el resultado.
+      </ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-button (clicked)="openDemoModal()">Abrir modal de confirmación</ui-button>
+        @if (lastModalResult(); as result) {
+          <ui-text variant="caption">Último resultado: {{ result }}</ui-text>
+        }
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="toast">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Toast</ui-title>
+      <ui-text color="muted">
+        Pila inferior derecha, máximo 3 visibles — la más antigua se descarta (RN-UI-08).
+        Auto-dismiss a los 5 s; duration 0 = persistente. Dispara varias seguidas para ver el
+        límite.
+      </ui-text>
+      <ui-container [gap]="2" center="vertical" wrap>
+        <ui-button variant="secondary" (clicked)="toast.success('Entidad guardada correctamente')">
+          success
+        </ui-button>
+        <ui-button
+          variant="secondary"
+          (clicked)="toast.error('No se pudo conectar con el servidor', { title: 'Error de red', duration: 0 })"
+        >
+          error (persistente)
+        </ui-button>
+        <ui-button variant="secondary" (clicked)="toast.info('Sincronización programada para esta noche')">
+          info
+        </ui-button>
+        <ui-button
+          variant="secondary"
+          (clicked)="toast.warning('La sesión expira en 5 minutos', { title: 'Atención' })"
+        >
+          warning
+        </ui-button>
+        <ui-button variant="ghost" (clicked)="toast.clear()">Limpiar todas</ui-button>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="tooltip">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Tooltip</ui-title>
+      <ui-text color="muted">
+        Directiva uiTooltip aplicable a cualquier elemento; aparece con hover y también con foco
+        de teclado (aria-describedby). Posición configurable.
+      </ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-button variant="secondary" uiTooltip="Aparezco arriba (default)">top</ui-button>
+        <ui-button variant="secondary" uiTooltip="Aparezco abajo" tooltipPosition="bottom">
+          bottom
+        </ui-button>
+        <ui-button variant="secondary" uiTooltip="Aparezco a la izquierda" tooltipPosition="left">
+          left
+        </ui-button>
+        <ui-button variant="secondary" uiTooltip="Aparezco a la derecha" tooltipPosition="right">
+          right
+        </ui-button>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="dropdown">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Dropdown</ui-title>
+      <ui-text color="muted">
+        Menú flotante reusable (acciones de fila, formularios, modales). El disparador es el
+        contenido proyectado; el panel es glass. Abre con clic/flechas, cierra con clic fuera,
+        Escape o al seleccionar. Soporta iconos, acción destructiva y alineación.
+      </ui-text>
+      <ui-container [gap]="4" center="vertical" wrap>
+        <ui-dropdown [items]="dropdownActions" (selected)="onDropdownAction($event)">
+          Acciones
+          <ui-icon name="chevron-down" size="sm" />
+        </ui-dropdown>
+
+        <ui-dropdown align="end" [items]="dropdownActions" (selected)="onDropdownAction($event)">
+          <ui-icon name="more" size="sm" />
+        </ui-dropdown>
+
+        @if (lastDropdownAction(); as action) {
+          <ui-badge variant="info">última acción: {{ action }}</ui-badge>
+        }
+      </ui-container>
+
+      <ui-text variant="label">Dentro de una tabla (acciones por fila)</ui-text>
+      <ui-table [columns]="demoColumns" [rows]="demoRows">
+        <ng-template uiTableCell="status" let-row>
+          <ui-badge [variant]="statusVariant(row)" size="sm">{{ row['status'] }}</ui-badge>
+        </ng-template>
+        <ng-template uiTableCell="points" let-row>
+          <ui-container justify="end" center="vertical" [gap]="2">
+            <span>{{ row['points'] }}</span>
+            <ui-dropdown align="end" [items]="dropdownActions" (selected)="onDropdownAction($event)">
+              <ui-icon name="more" size="sm" />
+            </ui-dropdown>
+          </ui-container>
+        </ng-template>
+      </ui-table>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="filter">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Filter</ui-title>
+      <ui-text color="muted">
+        Filtro dirigido por configuración (capa dynamic): procesa una colección y emite la filtrada
+        en tiempo real (debounced). Aquí alimenta directamente a una Dynamic Table — escribe o elige
+        y mira cómo se reduce.
+      </ui-text>
+
+      <ui-card>
+        <ui-filter
+          [config]="demoFilterConfig"
+          [data]="dynamicRows"
+          (filteredChange)="onDemoFiltered($event)"
+        />
+      </ui-card>
+
+      <ui-dynamic-table [columns]="dynamicColumns" [rows]="filteredDynamicRows()" [pageSize]="5" />
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="dynamic-table">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Dynamic Table</ui-title>
+      <ui-text color="muted">
+        Tabla dirigida por configuración (capa dynamic): celdas tipadas (badge, chip, date, number,
+        boolean), selección múltiple por checkbox (CVA), columna de acciones y paginación interna.
+        Compone ui-table + ui-pagination — selecciona filas y pagina (4 por página).
+      </ui-text>
+
+      <ui-dynamic-table
+        [columns]="dynamicColumns"
+        [rows]="dynamicRows"
+        [actions]="tableActions"
+        selectionMode="multiple"
+        rowKey="id"
+        [pageSize]="4"
+        (selectionChange)="onTableSelection($event)"
+      />
+
+      <ui-text variant="caption">Filas seleccionadas: {{ tableSelectionCount() }}</ui-text>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="form-generator">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Form Generator</ui-title>
+      <ui-text color="muted">
+        Formulario generado desde un schema de metadatos (capa dynamic): wizard de 2 páginas, grid
+        de 12 columnas con span por campo, validadores declarativos (RN-UI-07) y visibilidad
+        condicional — el correo de notificaciones aparece solo al activar la casilla.
+      </ui-text>
+
+      <ui-card>
+        <ui-form-generator
+          [schema]="formSchema"
+          submitLabel="Registrar entidad"
+          (formSubmitted)="onGeneratedSubmit($event)"
+        />
+      </ui-card>
+
+      @if (generatedSubmission(); as submission) {
+        <ui-text variant="caption">{{ submission }}</ui-text>
+      }
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="chatbot">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Chatbot</ui-title>
+      <ui-text color="muted">
+        Superficie conversacional (capa dynamic): burbujas glass para el asistente y sólidas para
+        ti, avatares, indicador de escritura y auto-scroll. Presentacional puro — emite messageSent;
+        aquí un responder simulado contesta tras ~1 s.
+      </ui-text>
+
+      <ui-container layout="grid" [cols]="2" [gap]="4">
+        <ui-chatbot
+          [messages]="chatMessages()"
+          [typing]="chatTyping()"
+          title="Asistente Territorial"
+          (messageSent)="onChatSend($event)"
+        />
+        <ui-text variant="caption">
+          Escribe y pulsa Enter o «Enviar». El componente no contiene lógica de IA: solo renderiza
+          los mensajes que recibe y emite el texto enviado.
+        </ui-text>
+      </ui-container>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <section id="particles">
+    <ui-container direction="column" [gap]="4">
+      <ui-title [level]="2">Particles Background (capa visual)</ui-title>
+      <ui-text color="muted">
+        Fondo de toda la página renderizado con three.js (WebGL): partículas que reposan en su sitio,
+        reaccionan al puntero (repulsión con retorno por resorte) y, al hacer clic, emiten una onda de
+        gota que las empuja. El color sale del token --color-primary y cambia con el tema. No es del
+        kit (lleva lógica y pinta sus píxeles) — vive en la capa visual.
+      </ui-text>
+      <ui-text variant="caption">
+        Está montado como fondo de este showcase (fixed inset-0): mueve el mouse en cualquier parte y
+        haz clic sobre el lienzo para probarlo. three se carga de forma diferida solo en el navegador.
+      </ui-text>
+    </ui-container>
+  </section>
+
+  <ui-divider />
+
+  <footer>
+    <ui-container direction="column" center="horizontal" [gap]="1">
+      <ui-text variant="caption">
+        UI Kit Territorial — 26 componentes · 7 capas · tokens dark/light · WCAG AA
+      </ui-text>
+      <ui-text variant="caption">
+        Reglas de negocio RN-UI-01…08 en spec.md · documentación por componente en
+        src/docs/ui-kit/
+      </ui-text>
+    </ui-container>
+  </footer>
+    </ui-container>
+  </ui-glass-stage>
+</ui-container>
