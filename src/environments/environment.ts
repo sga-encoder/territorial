@@ -4,7 +4,7 @@ export const environment: AppEnvironment = {
   production: true,
   // TODO(deploy): replace with the production backend URL when it exists.
   baseUrl: 'http://127.0.0.1:5000',
-  groqApiKey: 'GROQ_API_KEY_REMOVED',
+  groqApiKey: '',
   // Empty = use the bundled no-key dark basemap. Set a style URL to swap basemaps.
   mapStyleUrl: '',
   // TODO(CU-07): fill in with the real Firebase project keys.
