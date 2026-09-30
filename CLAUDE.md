@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## Project Context
@@ -8,7 +10,34 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Backend: Flask REST API in `../territorial_backend` (domain models, mockups CU-1…CU-15 and class diagram live there).
 - Communication: respond to the user in Spanish. Code identifiers and comments in English. Docs under `src/docs/` are written in Spanish.
 - **Always check `src/docs/` first** whenever you need to recall how something works: `src/docs/ui-kit/*.md` documents every design-system component (API, usage, decisions) and `src/docs/*.md` documents features/layout. Read the relevant doc BEFORE re-reading source code or guessing — and keep these docs updated when behavior changes.
-- `spec.md` is not in the repo; its palette (§8) is preserved in `src/styles/_variables.scss` and domain/auth notes (§3, §4) are referenced from code comments.
+- `spec.md` (repo root) is the **domain contract** and is READ-ONLY: backend DTOs/routes (§3), auth (§4), business rules CU-01…CU-15 (§5), coding standards (§12), UI Kit rules RN-UI-* (§13). Read the relevant section before implementing. Note: §7 lists Leaflet/ApexCharts, but the code actually uses `maplibre-gl` for maps and a custom `ReportChart` for reports.
+
+## Working Agreements
+
+- **Reply style:** always answer the user in Spanish using caveman **ultra** mode (`/caveman ultra`). Code, comments, commits and docs stay in normal prose.
+- **Code search:** always use the `codebase-memory-mcp` graph first (project `home-x-x-Proyectos-territorial`): `search_graph` for symbols, `trace_path` for callers/callees, `get_code_snippet` for source, `get_architecture` for overview. Fall back to grep/Read only for literals, HTML/SCSS content, or index coverage gaps.
+- **Spec Driven Development (`spec/`):** no feature code before its spec. Flow: `spec/features/NNN-name/spec.md` (what + acceptance criteria) → `plan.md` (how, respecting `spec/constitution/tech-stack.md`) → `tasks.md` (checklist) → implement → validate → move to "Hecho" in `spec/constitution/roadmap.md`. The constitution wins: if a feature clashes with `mission.md`/`tech-stack.md`, rethink the feature. Copy `spec/features/_template/` for new features.
+
+## Commands
+
+- `npm start` — dev server at `http://localhost:4200` (expects Flask backend at `environment.baseUrl`, default `http://127.0.0.1:5000`).
+- `npm run build` — production build to `dist/territorial/` (browser + SSR server).
+- `npm run serve:ssr:territorial` — run the built SSR Express server.
+- `npm test` — Vitest via `@angular/build:unit-test`. Single file: `npx ng test --include='src/app/path/file.spec.ts'`. No spec files exist yet; per `.claude/CLAUDE.md`, tests come from the Validation section of `spec.md`, never written ad hoc.
+- Formatting: Prettier (`npx prettier --write <files>`); no linter configured.
+
+## Architecture (big picture)
+
+- **Hybrid architecture (spec.md §2):**
+  - Uniform CRUDs: `core/http/base-repository.ts` (generic 7 verbs) + one `ResourceMapper` per resource. Each resource under `pages/<resource>/` has model · dto · mapper · repository · service · list · form-dialog. Reference implementation: `pages/entities/` (doc: `src/docs/entity.md`, shared variants in `src/docs/crud-resources.md`).
+  - Map/polygons/tracking: light hexagonal (`pages/map/{domain,data,ui}`, `pages/neighborhoods/polygon-editor/`), built on `maplibre-gl`; base style in `components/map/map-style.ts`.
+  - Reports: `pages/reports/` (backend dictates chart type; Groq-backed chat in `groq-chat.service.ts`).
+- **Data flow:** Component → Service (signals, `firstValueFrom`) → Repository → HttpClient → Backend. Snake_case DTOs never leave repository/mapper; UI models are camelCase.
+- **Gotcha:** backend PKs are `id_<resource>` (e.g. `id_city`), never `id`. Mappers translate to model `id`; reading `dto.id` silently breaks edit/delete and `toLabelMap` parent resolution.
+- **Auth:** Firebase Auth in `core/auth/auth.service.ts` (role resolved via backend by email), `authInterceptor`, `authGuard`, `roleGuard([...roles])`. Routes in `app.routes.ts`: `/login` public, everything else lazy-loaded inside `layout/shell` behind guards.
+- **SSR:** data loading goes in the constructor guarded by `isPlatformBrowser` (no `ngOnInit` for data).
+- **Component layers:** `components/ui` (design system atoms, barrel `index.ts`, types in `types.ts`), `components/dynamic` (FormGenerator, Filter, DynamicTable, PageHeader, Chatbot; docs in `src/docs/dynamic/`), `components/visual` (GlassStage, Particles), `components/map`.
+- **Naming (spec.md §12):** pages files without `.component.` (`entity-list.ts`, class `EntityList`); private signals `xSignal`, public readonly without suffix.
 
 ## TypeScript Best Practices
 
@@ -72,5 +101,5 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - **Highlight:** the top light line (`surface-highlight` mixin / `inset-shadow-highlight` utilities) is the unifying visual thread on both glass and solid surfaces.
 - Every UI Kit component: standalone, inputs typed with union types (never free strings), `input()`/`output()`/`computed()`, plus a Spanish doc entry in `src/docs/ui-kit/<component>.md` with usage and example.
 - Form components implement `ControlValueAccessor` and use solid surfaces (legibility).
-- UI business rules live in `./spec.md` (RN-UI-*): all public union types in `src/app/components/ui/types.ts`, consumers import only from the barrel `src/app/components/ui/index.ts`, and the kit stays minimal (no components outside the agreed list).
+- UI business rules live in `./spec.md` §13 (RN-UI-*): all public union types in `src/app/components/ui/types.ts`, consumers import only from the barrel `src/app/components/ui/index.ts`, and the kit stays minimal (no components outside the agreed list).
 - Build order and theming details: `src/docs/ui-kit/theming.md`.
