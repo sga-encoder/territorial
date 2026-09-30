@@ -16,8 +16,9 @@ _Implementado antes de adoptar SDD (sin carpeta en `features/`; documentado en `
 ## Siguiente 🔜
 
 1. **001 · Seed de demostración** — base llena de datos de ejemplo + cuentas Firebase demo (en curso, falta verificación visual).
+2. **002 · Imágenes en Cloudinary** — logos, categorías y evidencias fuera del disco efímero de Render (en curso).
 
-_Luego: crear `features/002-<nombre>/` desde `features/_template/`._
+_Luego: crear `features/003-<nombre>/` desde `features/_template/`._
 
 ## Backlog / ideas 💡
 
