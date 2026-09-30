@@ -8,7 +8,7 @@
 - **Framework / runtime:** Angular 22 standalone + signals, SSR con Express 5.
 - **Estilos:** Tailwind CSS v4 (config CSS-first) + SCSS para animaciones.
 - **Mapas:** `maplibre-gl`. **Auth:** Firebase Auth. **Tiempo real:** `socket.io-client`. **Iconos:** `@ng-icons/lucide`.
-- **Base de datos:** no aplica (API Flask en `../territorial_backend`).
+- **Base de datos:** PostgreSQL en Neon, a través de la API Flask (`sga-encoder/territorial-backend`, desplegada en Render).
 - **Tests:** Vitest vía `@angular/build:unit-test`; los tests se generan desde la sección Validation de `spec.md`.
 
 ## Archivos / módulos clave

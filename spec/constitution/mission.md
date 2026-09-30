@@ -2,7 +2,7 @@
 
 ## Qué construimos
 
-Frontend Angular del **Sistema de Valoración Territorial**: plataforma para alcaldías colombianas que permite reconocer, caracterizar y cuidar el territorio. Consume una API REST Flask inmutable (`../territorial_backend`).
+Frontend Angular del **Sistema de Valoración Territorial**: plataforma para alcaldías colombianas que permite reconocer, caracterizar y cuidar el territorio. Consume una API REST Flask inmutable (`sga-encoder/territorial-backend`).
 
 1. **Espacial** — jerarquía territorial (departamento › ciudad › comuna › barrio) y demarcación de barrios con polígonos en mapa.
 2. **Social** — anotaciones geolocalizadas de ciudadanos, con categorías, evidencias e interesados.

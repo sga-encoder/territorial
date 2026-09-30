@@ -7,7 +7,7 @@
 - [x] `scripts/seed_firebase_users.py` (alta de cuentas con `Admin123*`).
 - [x] Documentar el uso en el README del backend.
 - [x] Ejecutar el seed y verificar los conteos y restricciones.
-- [x] Habilitar CORS en el backend (sin él el frontend no resuelve el rol y rechaza el login).
+- [x] Usar el backend con CORS (`sga-encoder/territorial-backend` ya lo trae; la copia vieja del curso no, y el login fallaba).
 - [x] Verificar login admin en el frontend.
 - [ ] Verificar en el frontend: listas, mapa, tracking.
 - [ ] Validar contra los criterios de aceptación de `spec.md`.

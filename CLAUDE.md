@@ -7,7 +7,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Project Context
 
 - Angular v22 (standalone, signals, SSR via Express), Tailwind CSS v4 (CSS-first config), SCSS, Vitest.
-- Backend: Flask REST API in `../territorial_backend` (domain models, mockups CU-1…CU-15 and class diagram live there).
+- Backend: Flask REST API, repo `sga-encoder/territorial-backend` (local clone `~/Code/territorial-backend`), PostgreSQL on Neon, deployed on Render. Demo data: `scripts/seed_demo.py` (see `spec/features/001-demo-seed/`). Mockups CU-1…CU-15 and class diagram live in the original course repo (`~/Code/territorial_backend`).
 - Communication: respond to the user in Spanish. Code identifiers and comments in English. Docs under `src/docs/` are written in Spanish.
 - **Always check `src/docs/` first** whenever you need to recall how something works: `src/docs/ui-kit/*.md` documents every design-system component (API, usage, decisions) and `src/docs/*.md` documents features/layout. Read the relevant doc BEFORE re-reading source code or guessing — and keep these docs updated when behavior changes.
 - `spec.md` (repo root) is the **domain contract** and is READ-ONLY: backend DTOs/routes (§3), auth (§4), business rules CU-01…CU-15 (§5), coding standards (§12), UI Kit rules RN-UI-* (§13). Read the relevant section before implementing. Note: §7 lists Leaflet/ApexCharts, but the code actually uses `maplibre-gl` for maps and a custom `ReportChart` for reports.

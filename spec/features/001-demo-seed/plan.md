@@ -2,7 +2,7 @@
 
 ## Enfoque
 
-El seed vive en el backend (`territorial_backend_flask/scripts/`), porque la base es suya y el ORM permite sembrar sin autenticación y en una sola transacción. El contrato de la API no cambia, así que el frontend sigue respetando la regla de "backend inmutable" de `spec.md`.
+El seed vive en el backend (`sga-encoder/territorial-backend`, carpeta `scripts/`), porque la base es suya y el ORM permite sembrar sin autenticación y en una sola transacción. El contrato de la API no cambia, así que el frontend sigue respetando la regla de "backend inmutable" de `spec.md`.
 
 Los datos se generan con `random.Random(42)` a partir de catálogos escritos a mano (nombres inventados, barrios, categorías, textos de anotaciones), así que el resultado es verosímil y reproducible.
 
