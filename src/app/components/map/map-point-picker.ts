@@ -28,6 +28,7 @@ import {
   createBaseMapStyle,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  loadMapLibre,
   readCssVar,
 } from './map-style';
 
@@ -294,7 +295,7 @@ export class MapPointPicker implements ControlValueAccessor {
   // --- Map --------------------------------------------------------------------
 
   private async initMap(): Promise<void> {
-    const maplibregl = await import('maplibre-gl');
+    const maplibregl = await loadMapLibre();
     const style = environment.mapStyleUrl !== '' ? environment.mapStyleUrl : createBaseMapStyle();
     const initial = this.point();
     const map = new maplibregl.Map({

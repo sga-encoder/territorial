@@ -58,6 +58,11 @@ consultan al mapa. Eso mantiene la lógica testeable y el render reemplazable.
 - **SSR:** MapLibre carga solo en el browser (`afterNextRender` + `import()`
   dinámico). El servidor renderiza un contenedor vacío. El chunk `maplibre-gl`
   (~1.6 MB) es lazy: solo se descarga al entrar al editor.
+- **Carga de MapLibre:** siempre con `loadMapLibre()` (`components/map`), nunca
+  `await import('maplibre-gl')` directo. MapLibre es un bundle UMD: en `ng serve`
+  expone `Map`, pero en el build de producción solo trae export `default`, así
+  que `(await import('maplibre-gl')).Map` es `undefined` y el mapa falla con
+  `Map is not a constructor`. El helper lee `default` cuando existe.
 
 ### Mapa base (temable, configurable)
 

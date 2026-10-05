@@ -8,5 +8,6 @@ export {
   createBaseMapStyle,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  loadMapLibre,
   readCssVar,
 } from './map-style';

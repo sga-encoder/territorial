@@ -33,6 +33,7 @@ import {
   createBaseMapStyle,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  loadMapLibre,
   readCssVar,
 } from '../../../components/map';
 import { environment } from '../../../../environments/environment';
@@ -376,7 +377,7 @@ export class AnnotationMap {
     const container = this.mapContainer()?.nativeElement;
     if (container === undefined) return;
 
-    const maplibregl = await import('maplibre-gl');
+    const maplibregl = await loadMapLibre();
     const style = usesTokenBasemap() ? createBaseMapStyle() : environment.mapStyleUrl;
 
     const map = new maplibregl.Map({

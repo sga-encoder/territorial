@@ -23,6 +23,7 @@ import {
   createBaseMapStyle,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  loadMapLibre,
 } from '../../../components/map';
 import { environment } from '../../../../environments/environment';
 import { PolygonEditorState } from './polygon-editor-state';
@@ -179,7 +180,7 @@ export class PolygonMap {
   }
 
   private async initMap(): Promise<void> {
-    const maplibregl = await import('maplibre-gl');
+    const maplibregl = await loadMapLibre();
     const style = usesTokenBasemap() ? createBaseMapStyle() : environment.mapStyleUrl;
     const map = new maplibregl.Map({
       container: this.container().nativeElement,

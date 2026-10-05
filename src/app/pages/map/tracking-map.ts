@@ -32,6 +32,7 @@ import {
   createBaseMapStyle,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  loadMapLibre,
   readCssVar,
 } from '../../components/map';
 import { environment } from '../../../environments/environment';
@@ -188,7 +189,7 @@ export class TrackingMap {
     const container = this.mapContainer()?.nativeElement;
     if (container === undefined) return;
 
-    const maplibregl = await import('maplibre-gl');
+    const maplibregl = await loadMapLibre();
     const style = usesTokenBasemap() ? createBaseMapStyle() : environment.mapStyleUrl;
 
     this.popup = new maplibregl.Popup({ closeButton: true, maxWidth: '260px', offset: 10 });

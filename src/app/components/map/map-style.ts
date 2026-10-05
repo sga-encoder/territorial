@@ -17,6 +17,18 @@ const LABEL_FONT = ['Noto Sans Regular'];
 export const DEFAULT_MAP_CENTER: [number, number] = [-75.5138, 5.0703];
 export const DEFAULT_MAP_ZOOM = 12;
 
+type MapLibreModule = typeof import('maplibre-gl');
+
+/**
+ * Lazy-loads MapLibre. The package ships a UMD bundle: the dev server exposes its
+ * named exports, but the production build exposes the library only as the default
+ * export, so `(await import('maplibre-gl')).Map` is undefined there.
+ */
+export async function loadMapLibre(): Promise<MapLibreModule> {
+  const maplibreModule = await import('maplibre-gl');
+  return (maplibreModule as MapLibreModule & { default?: MapLibreModule }).default ?? maplibreModule;
+}
+
 /** Reads a CSS custom property off the document root, with a fallback. */
 export function readCssVar(root: HTMLElement, name: string, fallback: string): string {
   const value = getComputedStyle(root).getPropertyValue(name).trim();
