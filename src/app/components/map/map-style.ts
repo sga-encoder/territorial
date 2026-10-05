@@ -26,7 +26,9 @@ type MapLibreModule = typeof import('maplibre-gl');
  */
 export async function loadMapLibre(): Promise<MapLibreModule> {
   const maplibreModule = await import('maplibre-gl');
-  return (maplibreModule as MapLibreModule & { default?: MapLibreModule }).default ?? maplibreModule;
+  return (
+    (maplibreModule as MapLibreModule & { default?: MapLibreModule }).default ?? maplibreModule
+  );
 }
 
 /** Reads a CSS custom property off the document root, with a fallback. */
