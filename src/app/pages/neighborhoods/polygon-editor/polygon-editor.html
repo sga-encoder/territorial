@@ -22,7 +22,7 @@
           <ui-empty-state
             icon="waypoints"
             title="Elige un barrio para demarcar"
-            message="Selecciona un barrio en el panel derecho para ver su polígono o trazar uno nuevo."
+            message="Elige departamento, ciudad, comuna y barrio en el panel derecho para ver su polígono o trazar uno nuevo."
           />
         </div>
       } @else {
@@ -90,23 +90,54 @@
       @if (toolsOpen()) {
         <div class="flex flex-1 flex-col gap-3 overflow-y-auto pr-0.5">
 
-          <!-- Ciudad + Barrio selectors -->
+          <!-- Territorial cascade: Departamento → Ciudad → Comuna → Barrio (RN-13) -->
           <ui-card>
             <ui-container direction="column" [gap]="3">
               <ui-select
-                label="Ciudad"
+                label="Departamento"
                 iconStart="map-pin"
-                placeholder="Filtrar por ciudad…"
-                [options]="cityOptions()"
-                [formControl]="cityControl"
+                placeholder="Selecciona un departamento…"
+                [searchable]="true"
+                [sort]="true"
+                [options]="departmentOptions()"
+                [formControl]="departmentControl"
               />
-              <ui-select
-                label="Barrio"
-                iconStart="waypoints"
-                placeholder="Selecciona un barrio…"
-                [options]="neighborhoodOptions()"
-                [formControl]="neighborhoodControl"
-              />
+              @if (hasDepartment()) {
+                <ui-select
+                  label="Ciudad"
+                  iconStart="map-pin"
+                  placeholder="Selecciona una ciudad…"
+                  [searchable]="true"
+                  [sort]="true"
+                  [options]="cityOptions()"
+                  [formControl]="cityControl"
+                />
+              }
+              @if (hasCity()) {
+                @if (cityHasCommunes()) {
+                  <ui-select
+                    label="Comuna"
+                    iconStart="waypoints"
+                    placeholder="Todas las comunas"
+                    [sort]="true"
+                    [options]="communeOptions()"
+                    [formControl]="communeControl"
+                  />
+                  <ui-select
+                    label="Barrio"
+                    iconStart="waypoints"
+                    placeholder="Selecciona un barrio…"
+                    [searchable]="true"
+                    [sort]="true"
+                    [options]="neighborhoodOptions()"
+                    [formControl]="neighborhoodControl"
+                  />
+                } @else {
+                  <ui-text variant="caption" color="muted">
+                    Esta ciudad no tiene comunas registradas, así que no hay barrios para demarcar.
+                  </ui-text>
+                }
+              }
             </ui-container>
           </ui-card>
 

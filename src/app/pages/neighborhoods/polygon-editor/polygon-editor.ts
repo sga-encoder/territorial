@@ -25,9 +25,11 @@ import { PageHeader } from '../../../components/dynamic';
 import type { PageHeaderAction } from '../../../components/dynamic';
 import { ConfirmDialog } from '../../shared/confirm-dialog';
 import { CityService } from '../../cities/city.service';
+import { DepartmentService } from '../../departments/department.service';
 import { CommuneService } from '../../communes/commune.service';
 import { NeighborhoodService } from '../neighborhood.service';
 import { NeighborhoodPolygonService } from '../neighborhood-polygon.service';
+import type { Neighborhood } from '../../../models/neighborhood.model';
 import type { NeighborhoodPolygon } from '../../../models/neighborhood-polygon';
 import { PolygonEditorState } from './polygon-editor-state';
 import { PolygonMap } from './polygon-map';
@@ -40,7 +42,8 @@ const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
 /**
  * Page container for the neighborhood polygon editor. It orchestrates the flow —
- * pick a city → pick a neighborhood → load its polygon → edit on the map → save —
+ * pick department → city → commune (when the city has any) → neighborhood (RN-13)
+ * → load its polygon → edit on the map → save —
  * while every concern stays in its own layer: editing state in {@link PolygonEditorState}
  * (provided here, shared with the child map), persistence in
  * {@link NeighborhoodPolygonService}, render/interaction in {@link PolygonMap}.
@@ -69,6 +72,7 @@ const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] };
 })
 export class PolygonEditor {
   protected readonly state = inject(PolygonEditorState);
+  private readonly departmentService = inject(DepartmentService);
   private readonly cityService = inject(CityService);
   private readonly communeService = inject(CommuneService);
   private readonly neighborhoodService = inject(NeighborhoodService);
@@ -80,7 +84,9 @@ export class PolygonEditor {
 
   protected readonly subtitle = PAGE_SUBTITLE;
 
+  protected readonly departmentControl = new FormControl<string | null>(null);
   protected readonly cityControl = new FormControl<string | null>(null);
+  protected readonly communeControl = new FormControl<string | null>(null);
   protected readonly neighborhoodControl = new FormControl<string | null>(null);
 
   protected readonly loading = signal(false);
@@ -91,30 +97,47 @@ export class PolygonEditor {
   /** GeoJSON passed to PolygonMap to render all city boundaries when no neighborhood is selected. */
   protected readonly overviewPolygons = signal<FeatureCollection>(EMPTY_FC);
 
-  private readonly cityValue = toSignal(this.cityControl.valueChanges, { initialValue: null });
+  private readonly departmentId = toSignal(this.departmentControl.valueChanges, {
+    initialValue: null,
+  });
+  private readonly cityId = toSignal(this.cityControl.valueChanges, { initialValue: null });
+  private readonly communeId = toSignal(this.communeControl.valueChanges, { initialValue: null });
 
-  protected readonly cityOptions = computed<readonly FieldOption[]>(() =>
-    this.cityService.cities().map((city) => ({ value: String(city.id), label: city.name })),
+  protected readonly departmentOptions = computed<readonly FieldOption[]>(() =>
+    this.departmentService
+      .departments()
+      .map((department) => ({ value: String(department.id), label: department.name })),
   );
 
-  /** Neighborhoods filtered by the selected city (all if no city selected). */
-  protected readonly neighborhoodOptions = computed<readonly FieldOption[]>(() => {
-    const cityId = Number(this.cityValue());
-    if (!cityId) {
-      return this.neighborhoodService
-        .neighborhoods()
-        .map((n) => ({ value: String(n.id), label: n.name }));
-    }
-    const communeIds = new Set(
-      this.communeService.communes()
-        .filter((c) => c.idCity === cityId)
-        .map((c) => c.id),
-    );
-    return this.neighborhoodService
-      .neighborhoods()
-      .filter((n) => communeIds.has(n.idCommune))
-      .map((n) => ({ value: String(n.id), label: n.name }));
+  /** Cities of the selected department. */
+  protected readonly cityOptions = computed<readonly FieldOption[]>(() => {
+    const departmentId = Number(this.departmentId());
+    return this.cityService
+      .cities()
+      .filter((city) => city.idDepartment === departmentId)
+      .map((city) => ({ value: String(city.id), label: city.name }));
   });
+
+  /** Communes of the selected city. */
+  protected readonly communeOptions = computed<readonly FieldOption[]>(() => {
+    const cityId = Number(this.cityId());
+    return this.communeService
+      .communes()
+      .filter((commune) => commune.idCity === cityId)
+      .map((commune) => ({ value: String(commune.id), label: commune.name }));
+  });
+
+  protected readonly hasDepartment = computed(() => this.departmentId() !== null);
+  protected readonly hasCity = computed(() => this.cityId() !== null);
+  protected readonly cityHasCommunes = computed(() => this.communeOptions().length > 0);
+
+  /** Neighborhoods of the selected commune, or of the whole city while no commune is picked. */
+  protected readonly neighborhoodOptions = computed<readonly FieldOption[]>(() =>
+    this.scopedNeighborhoods(Number(this.cityId()), Number(this.communeId())).map((n) => ({
+      value: String(n.id),
+      label: n.name,
+    })),
+  );
 
   /** The neighborhood currently loaded into the editor (from state). */
   protected readonly neighborhood = this.state.neighborhood;
@@ -170,21 +193,24 @@ export class PolygonEditor {
 
   constructor() {
     if (this.isBrowser) {
+      void this.departmentService.loadAll();
       void this.cityService.loadAll();
       void this.communeService.loadAll();
       void this.neighborhoodService.loadAll();
     }
 
-    // When the city changes: reset neighborhood selection and load the city overview.
-    this.cityControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((cityId) => {
+    // Each level clears the levels below it and the loaded polygon (RN-13 cascade).
+    this.departmentControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.cityControl.setValue(null);
+    });
+    this.cityControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.communeControl.setValue(null);
+    });
+    this.communeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.neighborhoodControl.setValue(null, { emitEvent: false });
       this.state.reset();
       this.loadError.set(null);
-      if (cityId !== null) {
-        void this.loadCityOverview(Number(cityId));
-      } else {
-        this.overviewPolygons.set(EMPTY_FC);
-      }
+      void this.loadOverview();
     });
 
     this.neighborhoodControl.valueChanges
@@ -193,13 +219,10 @@ export class PolygonEditor {
   }
 
   private async onNeighborhoodSelected(id: string | null): Promise<void> {
-    // When the user clears the neighborhood, show the city overview again.
+    // When the user clears the neighborhood, show the city/commune overview again.
     if (id === null) {
-      const cityId = Number(this.cityControl.value);
-      if (cityId) {
-        void this.loadCityOverview(cityId);
-      }
       this.state.reset();
+      void this.loadOverview();
       return;
     }
     // Guard unsaved edits before switching neighborhoods.
@@ -215,16 +238,26 @@ export class PolygonEditor {
     await this.loadPolygon(Number(id));
   }
 
-  /** Loads all polygons for the given city and sends them to the map overview layer. */
-  private async loadCityOverview(cityId: number): Promise<void> {
-    const communeIds = new Set(
-      this.communeService.communes()
-        .filter((c) => c.idCity === cityId)
-        .map((c) => c.id),
+  /** Neighborhoods inside the selected commune, or the whole city when no commune is picked. */
+  private scopedNeighborhoods(cityId: number, communeId: number): Neighborhood[] {
+    if (!cityId) return [];
+    const communeIds = communeId
+      ? new Set([communeId])
+      : new Set(
+          this.communeService
+            .communes()
+            .filter((commune) => commune.idCity === cityId)
+            .map((commune) => commune.id),
+        );
+    return this.neighborhoodService.neighborhoods().filter((n) => communeIds.has(n.idCommune));
+  }
+
+  /** Loads every polygon in the current scope (city or commune) into the map overview layer. */
+  private async loadOverview(): Promise<void> {
+    const cityNeighborhoods = this.scopedNeighborhoods(
+      Number(this.cityControl.value),
+      Number(this.communeControl.value),
     );
-    const cityNeighborhoods = this.neighborhoodService
-      .neighborhoods()
-      .filter((n) => communeIds.has(n.idCommune));
 
     if (cityNeighborhoods.length === 0) {
       this.overviewPolygons.set(EMPTY_FC);

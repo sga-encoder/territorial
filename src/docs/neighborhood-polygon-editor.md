@@ -16,7 +16,18 @@ diffea).
 
 Entrada propia en el sidebar (**Territorio → Demarcación**), ruta
 `/territory/demarcation`. La página trae su propio selector de barrio, así que una
-sola ruta basta. TODO(CU-07): proteger con `authGuard` + `roleGuard(['official'])`
+sola ruta basta.
+
+### Selección en cascada (RN-13)
+
+El panel derecho elige el barrio siguiendo la jerarquía territorial:
+**Departamento → Ciudad → Comuna → Barrio**. Cada selector aparece al elegir el
+anterior y lista solo sus hijos (departamento y ciudad con búsqueda). La comuna
+solo se muestra si la ciudad tiene comunas; si no, un aviso indica que no hay
+barrios para demarcar. El barrio es opcionalmente filtrable por comuna: sin comuna
+lista todos los de la ciudad. Cambiar un nivel limpia los inferiores y el
+polígono cargado; el mapa muestra el resumen de polígonos del alcance actual
+(ciudad o comuna) hasta que se elige un barrio. TODO(CU-07): proteger con `authGuard` + `roleGuard(['official'])`
 — solo el Funcionario demarca (RN-23).
 
 ## Arquitectura — responsabilidades separadas
