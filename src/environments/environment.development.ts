@@ -2,7 +2,9 @@ import { AppEnvironment } from './app-environment';
 
 export const environment: AppEnvironment = {
   production: false,
-  baseUrl: 'http://127.0.0.1:5000',
+  // Deployed API by default, so no local backend is needed.
+  // To develop against a local backend, use 'http://127.0.0.1:5000'.
+  baseUrl: 'https://territorial-backend.onrender.com',
   groqApiKey: '',
   // Empty = use the bundled no-key dark basemap. Set a style URL to swap basemaps.
   mapStyleUrl: '',

@@ -2,8 +2,8 @@ import { AppEnvironment } from './app-environment';
 
 export const environment: AppEnvironment = {
   production: true,
-  // TODO(deploy): replace with the production backend URL when it exists.
-  baseUrl: 'http://127.0.0.1:5000',
+  // Flask API on Render (sga-encoder/territorial-backend), backed by Neon + Cloudinary.
+  baseUrl: 'https://territorial-backend.onrender.com',
   groqApiKey: '',
   // Empty = use the bundled no-key dark basemap. Set a style URL to swap basemaps.
   mapStyleUrl: '',

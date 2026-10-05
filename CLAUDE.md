@@ -20,7 +20,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Commands
 
-- `npm start` — dev server at `http://localhost:4200` (expects Flask backend at `environment.baseUrl`, default `http://127.0.0.1:5000`).
+- `npm start` — dev server at `http://localhost:4200`. Both environments point `baseUrl` to the deployed API `https://territorial-backend.onrender.com` (free tier: first request after idle takes ~50 s); switch to `http://127.0.0.1:5000` in `environment.development.ts` to use a local backend.
 - `npm run build` — production build to `dist/territorial/` (browser + SSR server).
 - `npm run serve:ssr:territorial` — run the built SSR Express server.
 - `npm test` — Vitest via `@angular/build:unit-test`. Single file: `npx ng test --include='src/app/path/file.spec.ts'`. No spec files exist yet; per `.claude/CLAUDE.md`, tests come from the Validation section of `spec.md`, never written ad hoc.
