@@ -78,12 +78,13 @@ const ADMIN_NAV: readonly SidebarEntry[] = [
   },
   {
     kind: 'group',
+    // Disabled: reports are switched off for now (feature 005).
     id: 'reports',
     label: 'Reportes',
     icon: 'bar-chart-2',
     children: [
-      { label: 'Consulta visual', path: '/reports', enabled: true, icon: 'bar-chart' },
-      { label: 'Chat IA', path: '/reports/chat', enabled: true, icon: 'message-square' },
+      { label: 'Consulta visual', path: '/reports', enabled: false, icon: 'bar-chart' },
+      { label: 'Chat IA', path: '/reports/chat', enabled: false, icon: 'message-square' },
     ],
   },
 ];

@@ -19,8 +19,9 @@ _Implementado antes de adoptar SDD (sin carpeta en `features/`; documentado en `
 2. **002 · Imágenes en Cloudinary** — logos, categorías y evidencias fuera del disco efímero de Render (en curso).
 3. **003 · Backend desplegado** — API en Render con Neon + Cloudinary; frontend apuntando a Render (falta verificación visual).
 4. **004 · Selección en cascada en Demarcación** — Departamento → Ciudad → Comuna → Barrio (falta verificación en navegador).
+5. **005 · Inhabilitar Reportes** — sidebar deshabilitado y `/reports` redirige al inicio.
 
-_Luego: crear `features/005-<nombre>/` desde `features/_template/`._
+_Luego: crear `features/006-<nombre>/` desde `features/_template/`._
 
 ## Backlog / ideas 💡
 

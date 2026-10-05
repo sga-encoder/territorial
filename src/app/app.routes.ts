@@ -101,12 +101,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pages/pending-users/pending-users.routes').then((m) => m.PENDING_USER_ROUTES),
       },
-      {
-        path: 'reports',
-        canActivate: [roleGuard(['admin'])],
-        loadChildren: () =>
-          import('./pages/reports/reports.routes').then((m) => m.REPORT_ROUTES),
-      },
+      // Reports are disabled for now (feature 005): the code stays in pages/reports/.
+      // To re-enable, restore:
+      //   canActivate: [roleGuard(['admin'])],
+      //   loadChildren: () => import('./pages/reports/reports.routes').then((m) => m.REPORT_ROUTES),
+      { path: 'reports', redirectTo: '', pathMatch: 'prefix' },
 
       // ── All roles ───────────────────────────────────────────────────────
       {
